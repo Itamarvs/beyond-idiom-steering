@@ -49,7 +49,7 @@ beyond-idiom-steering/
 
 - **Steering vector training data**: [IdioLink](https://huggingface.co/datasets/Intellexus/IdioLink) (CC-BY-4.0), loaded directly via `datasets.load_dataset("Intellexus/IdioLink", ...)` inside `load_idiolink_pool()` -- no manual download needed. Combines the `indexes` and `queries` configs and applies the paper's exact-surface-form filter.
 - **Idiom evaluation set**: `data/idiom_eval_benchmark_draft.csv` -- 20-idiom, ambiguous-prefix benchmark, 41 rows (idiom x variant).
-- **Figurative extension set**: `data/figurative_eval_benchmark.csv` -- 100 items across 20 expressions: 50 Conventional Metaphor, 25 Novel Metaphor, 25 Simile, each with an ambiguous prefix plus gold `expected_literal` / `expected_figurative` continuations (used to sanity-check the judge, not fed to the model).
+- **Figurative extension set**: `data/figurative_eval_benchmark.csv` -- 100 items across 20 expressions: 50 Conventional Metaphor, 25 Novel Metaphor, 25 Simile, each an ambiguous prefix (constructed per the IdioSteer rules: expression is sentence-final, context forces neither reading, both readings plausible, 5 wording-diverse variants per expression). A `gold` column flags one hand-picked, most rigorously bidirectionally-validated variant per expression (20 rows) for judge calibration / spot checks.
 - **Archived**: `data/archive/figurative_benchmark_draft.csv` -- an earlier 35-item draft (prefixes only, no gold continuations), superseded by `figurative_eval_benchmark.csv`. Kept for reference, not used by any notebook.
 
 ## Method
@@ -76,7 +76,7 @@ pip install -r requirements.txt
 Run the notebooks in `notebooks/` on a GPU runtime (Colab T4 or better; both a base LLM and an instruct judge model load sequentially, not concurrently, to fit in 16GB):
 
 1. `step_1_build_vector_and_eval_idioms.ipynb` -- builds and saves the idiom steering vector, evaluates it on `idiom_eval_benchmark_draft.csv`, produces `results/raw_idiom_results.csv` + `results/labeled_idiom_results.csv`.
-2. `step_3_eval_figurative_benchmark.ipynb` -- loads the vector Step 1 saved (does **not** rebuild it), evaluates it on `figurative_eval_benchmark.csv`, produces `results/raw_figurative_results.csv` + `results/labeled_figurative_results.csv`.
+2. `step_3_eval_figurative_benchmark.ipynb` -- loads the vector Step 1 saved (does **not** rebuild it), first runs a cheap smoke test on just the 20 `gold` rows (`results/raw_figurative_gold_smoketest.csv`) to catch pipeline issues before the full grid, then evaluates the full benchmark, producing `results/raw_figurative_results.csv` + `results/labeled_figurative_results.csv`. Also reports a gold-subset-only breakdown alongside the full and per-category ones.
 
 Then, locally (no GPU needed):
 
@@ -84,7 +84,7 @@ Then, locally (no GPU needed):
 python analysis/compare_idiom_vs_figurative.py
 ```
 
-produces `analysis/summary_by_alpha.csv`, `analysis/summary_by_category_alpha.csv`, and `analysis/literal_rate_vs_alpha.png` for the report.
+produces `analysis/summary_by_alpha.csv`, `analysis/summary_by_category_alpha.csv`, `analysis/summary_gold_by_alpha.csv` (gold-subset-only, higher-confidence slice), and `analysis/literal_rate_vs_alpha.png` for the report.
 
 ## Status
 

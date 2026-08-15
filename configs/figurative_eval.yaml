@@ -1,0 +1,61 @@
+# Step 3: Apply the idiom-derived steering vector to non-idiomatic
+# figurative expressions. Replace all TODO values with Step 1 values.
+
+experiment_name: figurative_eval_idiom_vector_v1
+
+# Must exactly match the base model used to construct the vector in Step 1.
+model:
+  name_or_path: TODO_MODEL_ID
+  revision: main
+  torch_dtype: bfloat16
+  device_map: auto
+  use_chat_template: false
+
+data:
+  benchmark_path: data/figurative_eval_benchmark.csv
+  id_column: item_id
+  prefix_column: prefix
+  expression_column: expression
+  category_column: category
+
+steering:
+  enabled: true
+  vector_path: artifacts/idiom_vector/steering_vector.pt
+  vector_orientation: figurative_minus_literal
+  vector_normalized: true
+
+  # Copy these from the successful Step 1 baseline.
+  source_layer: TODO_SOURCE_LAYER
+  injection_layer: TODO_INJECTION_LAYER
+
+  # The steering acts once on the prompt: the final token of the expression.
+  target_position: final_expression_token
+  apply_during: prompt_forward_pass_only
+  operator: additive
+
+  # With figurative-minus-literal orientation, negative values should
+  # steer toward literal continuations.
+  coefficients:
+    - 0.0
+    - TODO_LITERAL_COEFFICIENT_1
+    - TODO_LITERAL_COEFFICIENT_2
+    - TODO_LITERAL_COEFFICIENT_3
+
+generation:
+  do_sample: true
+  temperature: 0.7
+  top_p: 0.9
+  max_new_tokens: 50
+  num_samples_per_item: 5
+  seed: 42
+  stop_at_eos: true
+
+output:
+  run_dir: results/figurative_eval_idiom_vector_v1
+  generations_file: generations.jsonl
+  config_snapshot_file: config.yaml
+  overwrite: false
+
+smoke_test:
+  enabled: true
+  max_items: 5

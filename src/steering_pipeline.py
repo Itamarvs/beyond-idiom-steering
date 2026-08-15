@@ -422,19 +422,33 @@ def judge_label_batch(judge_model, judge_tokenizer, device,
 
 def run_judge_eval(judge_model, judge_tokenizer, device, in_csv: str, out_csv: str,
                     key_cols: Sequence[str] = ("idiom", "variant_id", "alpha_factor", "sample_i"),
-                    expr_col: str = "idiom", batch_size: int = 4) -> pd.DataFrame:
+                    expr_col: str = "idiom", batch_size: int = 4,
+                    checkpoint_every: int = 1) -> pd.DataFrame:
     """Resumable, checkpointed labeling loop mirroring run_generation_eval.
-    Batches `batch_size` judge calls per generate() -- on a T4 with the 4-bit
-    14B judge, unbatched labeling is ~25-30s/item (35 hours for ~4,500 items),
-    so batching is what makes a full sweep fit a Colab session. Tune
-    batch_size up if VRAM allows (watch for OOM), down if it doesn't.
 
-    Flushes to disk after every batch (not every single row) -- a crash
-    loses at most batch_size-1 in-flight items, and a rerun resumes from
-    whatever's already in out_csv. `expr_col` names the column holding the
-    target expression (an idiom for the idiom benchmark, a metaphor/simile
-    for the figurative benchmark -- pass expr_col="expression" for the
-    latter)."""
+    Two independent speed/safety levers:
+      - batch_size: judge calls grouped per generate() call. Decode is
+        memory-bandwidth-bound, so a bigger batch is close to free throughput
+        -- unbatched labeling is ~25-30s/item on a T4 with the 4-bit 14B
+        judge (35 hours for ~4,500 items); batching is what makes a full
+        sweep fit a session. Raise until you see an OOM, then back off.
+      - checkpoint_every: how many *batches* to accumulate in memory before
+        writing+syncing to disk (default 1 = write after every batch). Raise
+        this to cut disk/Drive-sync overhead if you don't need near-real-time
+        visibility into progress -- a crash loses at most
+        checkpoint_every * batch_size in-flight items; everything already
+        written is safe, and a rerun only redoes what wasn't written.
+
+    Each checkpoint write opens, appends, and closes the file (rather than
+    holding one handle open for the whole run) -- on local disk this is
+    negligible overhead; on a Google-Drive-mounted out_csv (via Colab's FUSE
+    layer), an actively-open handle can leave writes buffered and invisible
+    in Drive until it finally closes, so closing per checkpoint is what
+    actually forces a sync, not flush() alone.
+
+    `expr_col` names the column holding the target expression (an idiom for
+    the idiom benchmark, a metaphor/simile for the figurative benchmark --
+    pass expr_col="expression" for the latter)."""
     results_df = pd.read_csv(in_csv)
 
     done_keys = set()
@@ -458,30 +472,37 @@ def run_judge_eval(judge_model, judge_tokenizer, device, in_csv: str, out_csv: s
     pbar = tqdm(total=len(results_df), desc="judging")
     pbar.update(len(done_keys))
 
-    for i in range(0, len(pending), batch_size):
-        batch_rows = pending[i:i + batch_size]
-        triples = [(row[expr_col], row["prefix"], row["continuation"]) for row in batch_rows]
-        labels = judge_label_batch(judge_model, judge_tokenizer, device, triples)
+    buffer = []  # (row, label) pairs accumulated since the last checkpoint
+    batches_since_checkpoint = 0
 
-        # Open, append, and close per batch rather than holding one file
-        # handle open for the whole run. On local disk this is negligible
-        # overhead; on a Google-Drive-mounted out_csv (via Colab's FUSE
-        # layer), an actively-open handle can leave writes buffered and
-        # invisible in Drive until it finally closes -- closing after every
-        # batch is what actually forces each batch to sync, not flush()
-        # alone.
+    def write_checkpoint():
+        if not buffer:
+            return
         with open(out_csv, "a", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
-            for row, label in zip(batch_rows, labels):
-                writer.writerow({**row.to_dict(), "label": label})
+            for buffered_row, buffered_label in buffer:
+                writer.writerow({**buffered_row.to_dict(), "label": buffered_label})
             f.flush()
             try:
                 os.fsync(f.fileno())
             except OSError:
                 pass  # not all filesystems (e.g. some FUSE mounts) support fsync
+        buffer.clear()
 
+    for i in range(0, len(pending), batch_size):
+        batch_rows = pending[i:i + batch_size]
+        triples = [(row[expr_col], row["prefix"], row["continuation"]) for row in batch_rows]
+        labels = judge_label_batch(judge_model, judge_tokenizer, device, triples)
+
+        buffer.extend(zip(batch_rows, labels))
+        batches_since_checkpoint += 1
         pbar.update(len(batch_rows))
 
+        if batches_since_checkpoint >= checkpoint_every:
+            write_checkpoint()
+            batches_since_checkpoint = 0
+
+    write_checkpoint()  # flush any remainder below a full checkpoint interval
     pbar.close()
 
     print("Done. Labeled results in", out_csv)

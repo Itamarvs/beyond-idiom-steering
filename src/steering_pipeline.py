@@ -113,6 +113,11 @@ def load_judge_model(judge_model_name: str = JUDGE_MODEL_NAME, device: Optional[
     (e.g. the original Qwen2.5-3B-Instruct) where fp16 fits comfortably."""
     device = device or get_device()
     judge_tokenizer = AutoTokenizer.from_pretrained(judge_model_name)
+    # Left-padding is required for batched causal-LM generation (so every
+    # sequence's "next token to generate" lines up at the same position).
+    judge_tokenizer.padding_side = "left"
+    if judge_tokenizer.pad_token is None:
+        judge_tokenizer.pad_token = judge_tokenizer.eos_token
 
     if load_in_4bit:
         from transformers import BitsAndBytesConfig
@@ -359,34 +364,10 @@ def run_generation_eval(model, tokenizer, device, eval_df: pd.DataFrame, v_md: n
 # LLM-as-judge labeling (figurative / literal / incoherent)
 # ---------------------------------------------------------------------------
 
-def judge_label(judge_model, judge_tokenizer, device, expression: str, prefix: str, continuation: str) -> str:
-    prompt = JUDGE_PROMPT_TEMPLATE.format(expression=expression, prefix=prefix, continuation=continuation)
-    messages = [{"role": "user", "content": prompt}]
-
-    inputs = judge_tokenizer.apply_chat_template(
-        messages, tokenize=True, add_generation_prompt=True,
-        return_tensors="pt", return_dict=True,
-        enable_thinking=False,  # Qwen3: answer directly, no <think> preamble --
-                                 # ignored harmlessly by chat templates that don't define it
-    ).to(device)
-
-    with torch.no_grad():
-        out_ids = judge_model.generate(
-            input_ids=inputs["input_ids"],
-            attention_mask=inputs["attention_mask"],
-            max_new_tokens=256,
-            do_sample=False,
-            pad_token_id=judge_tokenizer.eos_token_id,
-        )
-
-    prompt_len = inputs["input_ids"].shape[1]
-    response_text = judge_tokenizer.decode(
-        out_ids[0][prompt_len:], skip_special_tokens=True
-    ).strip()
+def _parse_judge_response(response_text: str) -> str:
     # Safety net in case enable_thinking=False isn't fully honored: strip any
     # leaked <think>...</think> block before looking for the final label.
     response_text = re.sub(r"<think>.*?</think>", "", response_text, flags=re.DOTALL).strip().upper()
-
     match = re.search(r"FINAL\s*LABEL\s*:\s*(FIGURATIVE|LITERAL|INCOHERENT)", response_text)
     if match:
         return match.group(1)
@@ -396,14 +377,64 @@ def judge_label(judge_model, judge_tokenizer, device, expression: str, prefix: s
     return "UNPARSEABLE"
 
 
+def judge_label(judge_model, judge_tokenizer, device, expression: str, prefix: str, continuation: str) -> str:
+    """Labels a single continuation. For bulk labeling use judge_label_batch /
+    run_judge_eval instead -- one-at-a-time generate() calls are far slower
+    per item on a GPU than a batched call (T4 + 4-bit 14B: ~25-30s/item
+    unbatched vs. roughly batch_size-x faster batched, since decode is
+    memory-bandwidth-bound and a batch amortizes the weight-load cost)."""
+    return judge_label_batch(judge_model, judge_tokenizer, device, [(expression, prefix, continuation)])[0]
+
+
+def judge_label_batch(judge_model, judge_tokenizer, device,
+                       triples: Sequence[tuple]) -> list:
+    """Labels a batch of (expression, prefix, continuation) triples in one
+    forward/generate call. Returns labels in the same order. Requires
+    judge_tokenizer.padding_side == "left" (set by load_judge_model)."""
+    texts = []
+    for expression, prefix, continuation in triples:
+        prompt = JUDGE_PROMPT_TEMPLATE.format(expression=expression, prefix=prefix, continuation=continuation)
+        text = judge_tokenizer.apply_chat_template(
+            [{"role": "user", "content": prompt}],
+            tokenize=False, add_generation_prompt=True,
+            enable_thinking=False,  # Qwen3: answer directly, no <think> preamble --
+                                     # ignored harmlessly by chat templates that don't define it
+        )
+        texts.append(text)
+
+    inputs = judge_tokenizer(texts, return_tensors="pt", padding=True).to(device)
+
+    with torch.no_grad():
+        out_ids = judge_model.generate(
+            **inputs,
+            max_new_tokens=256,
+            do_sample=False,
+            pad_token_id=judge_tokenizer.pad_token_id,
+        )
+
+    prompt_len = inputs["input_ids"].shape[1]
+    labels = []
+    for seq in out_ids:
+        response_text = judge_tokenizer.decode(seq[prompt_len:], skip_special_tokens=True).strip()
+        labels.append(_parse_judge_response(response_text))
+    return labels
+
+
 def run_judge_eval(judge_model, judge_tokenizer, device, in_csv: str, out_csv: str,
                     key_cols: Sequence[str] = ("idiom", "variant_id", "alpha_factor", "sample_i"),
-                    expr_col: str = "idiom") -> pd.DataFrame:
+                    expr_col: str = "idiom", batch_size: int = 4) -> pd.DataFrame:
     """Resumable, checkpointed labeling loop mirroring run_generation_eval.
+    Batches `batch_size` judge calls per generate() -- on a T4 with the 4-bit
+    14B judge, unbatched labeling is ~25-30s/item (35 hours for ~4,500 items),
+    so batching is what makes a full sweep fit a Colab session. Tune
+    batch_size up if VRAM allows (watch for OOM), down if it doesn't.
 
-    `expr_col` names the column holding the target expression (an idiom for
-    the idiom benchmark, a metaphor/simile for the figurative benchmark --
-    pass expr_col="expression" for the latter)."""
+    Flushes to disk after every batch (not every single row) -- a crash
+    loses at most batch_size-1 in-flight items, and a rerun resumes from
+    whatever's already in out_csv. `expr_col` names the column holding the
+    target expression (an idiom for the idiom benchmark, a metaphor/simile
+    for the figurative benchmark -- pass expr_col="expression" for the
+    latter)."""
     results_df = pd.read_csv(in_csv)
 
     done_keys = set()
@@ -414,6 +445,9 @@ def run_judge_eval(judge_model, judge_tokenizer, device, in_csv: str, out_csv: s
         print(f"Resuming: {len(done_keys)} rows already labeled.")
     else:
         print("No existing labels file -- starting fresh.")
+
+    pending = [row for _, row in results_df.iterrows()
+               if tuple(row[c] for c in key_cols) not in done_keys]
 
     fieldnames = list(results_df.columns) + ["label"]
     write_header = not file_exists
@@ -426,17 +460,17 @@ def run_judge_eval(judge_model, judge_tokenizer, device, in_csv: str, out_csv: s
         pbar = tqdm(total=len(results_df), desc="judging")
         pbar.update(len(done_keys))
 
-        for _, row in results_df.iterrows():
-            key = tuple(row[c] for c in key_cols)
-            if key in done_keys:
-                continue
+        for i in range(0, len(pending), batch_size):
+            batch_rows = pending[i:i + batch_size]
+            triples = [(row[expr_col], row["prefix"], row["continuation"]) for row in batch_rows]
+            labels = judge_label_batch(judge_model, judge_tokenizer, device, triples)
 
-            label = judge_label(judge_model, judge_tokenizer, device,
-                                 row[expr_col], row["prefix"], row["continuation"])
-            out_row = {**row.to_dict(), "label": label}
-            writer.writerow(out_row)
+            for row, label in zip(batch_rows, labels):
+                out_row = {**row.to_dict(), "label": label}
+                writer.writerow(out_row)
             f.flush()
-            pbar.update(1)
+
+            pbar.update(len(batch_rows))
 
         pbar.close()
 

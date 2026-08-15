@@ -450,29 +450,39 @@ def run_judge_eval(judge_model, judge_tokenizer, device, in_csv: str, out_csv: s
                if tuple(row[c] for c in key_cols) not in done_keys]
 
     fieldnames = list(results_df.columns) + ["label"]
-    write_header = not file_exists
 
-    with open(out_csv, "a", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        if write_header:
-            writer.writeheader()
+    if not file_exists:
+        with open(out_csv, "w", newline="", encoding="utf-8") as f:
+            csv.DictWriter(f, fieldnames=fieldnames).writeheader()
 
-        pbar = tqdm(total=len(results_df), desc="judging")
-        pbar.update(len(done_keys))
+    pbar = tqdm(total=len(results_df), desc="judging")
+    pbar.update(len(done_keys))
 
-        for i in range(0, len(pending), batch_size):
-            batch_rows = pending[i:i + batch_size]
-            triples = [(row[expr_col], row["prefix"], row["continuation"]) for row in batch_rows]
-            labels = judge_label_batch(judge_model, judge_tokenizer, device, triples)
+    for i in range(0, len(pending), batch_size):
+        batch_rows = pending[i:i + batch_size]
+        triples = [(row[expr_col], row["prefix"], row["continuation"]) for row in batch_rows]
+        labels = judge_label_batch(judge_model, judge_tokenizer, device, triples)
 
+        # Open, append, and close per batch rather than holding one file
+        # handle open for the whole run. On local disk this is negligible
+        # overhead; on a Google-Drive-mounted out_csv (via Colab's FUSE
+        # layer), an actively-open handle can leave writes buffered and
+        # invisible in Drive until it finally closes -- closing after every
+        # batch is what actually forces each batch to sync, not flush()
+        # alone.
+        with open(out_csv, "a", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
             for row, label in zip(batch_rows, labels):
-                out_row = {**row.to_dict(), "label": label}
-                writer.writerow(out_row)
+                writer.writerow({**row.to_dict(), "label": label})
             f.flush()
+            try:
+                os.fsync(f.fileno())
+            except OSError:
+                pass  # not all filesystems (e.g. some FUSE mounts) support fsync
 
-            pbar.update(len(batch_rows))
+        pbar.update(len(batch_rows))
 
-        pbar.close()
+    pbar.close()
 
     print("Done. Labeled results in", out_csv)
     return pd.read_csv(out_csv)

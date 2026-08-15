@@ -46,20 +46,38 @@ ALPHA_FACTOR_GRID = [-4.78, -3.59, -2.39, -1.20, 0.0, 1.20, 2.39, 3.59, 4.78]
 N_SAMPLES = 5
 MAX_NEW_TOKENS = 50
 
-JUDGE_MODEL_NAME = "Qwen/Qwen2.5-3B-Instruct"
-JUDGE_PROMPT_TEMPLATE = """You are evaluating whether a continuation of a sentence ending in the expression "{idiom}" interprets the expression FIGURATIVELY, LITERALLY, or is INCOHERENT.
+# Judge model. The Steering Idioms paper (Appendix J) selected Gemma-4-31B-it
+# after benchmarking several candidates (incl. GPT-4o, Claude Sonnet 3.5,
+# Llama-3.3-70B-Instruct, Qwen3) against a 280-item human-annotated gold set
+# (90.0% accuracy, Cohen's kappa=0.821 vs. gold; human-human kappa=0.867).
+# A 31B judge doesn't fit alongside the 3B generation model on a free-tier
+# Colab GPU even with the generation model freed first, so this uses
+# Qwen2.5-14B-Instruct (4-bit) as the largest judge that reliably fits --
+# a meaningful capacity step up from the original Qwen2.5-3B-Instruct judge,
+# which produced a flat, unreliable literal-rate signal (see README).
+JUDGE_MODEL_NAME = "Qwen/Qwen2.5-14B-Instruct"
+
+# Structured-reasoning prompt mirroring the paper's judge design (Appendix
+# J): state the figurative meaning, then the literal meaning, then check
+# coherence, then decide -- rather than jumping straight to a label. Guards
+# against the paper's two documented judge failure modes: (1) don't conflate
+# a literal *physical action* with a literal reading when that action
+# realizes the idiom's own conventional frame (e.g. bowing on stage for
+# "take a bow" is still FIGURATIVE); (2) don't over-label unusual-but-
+# coherent literal continuations as INCOHERENT.
+JUDGE_PROMPT_TEMPLATE = """You are evaluating whether a continuation of a sentence ending in the expression "{expression}" interprets the expression FIGURATIVELY, LITERALLY, or is INCOHERENT.
 
 Sentence prefix: "{prefix}"
 Continuation: "{continuation}"
 
-Definitions:
-- FIGURATIVE: The expression is used in its conventional, non-compositional sense. Note: Physical actions that realize the conventional frame (e.g. bowing on stage for 'take a bow') are still FIGURATIVE.
-- LITERAL: The component words are used compositionally outside the idiomatic/figurative frame (e.g. ice cubes, beans in a can).
-- INCOHERENT: The continuation is grammatically broken, nonsensical, or fails to form an imaginable scenario.
-
-Step 1: Briefly state if the continuation is coherent.
-Step 2: State whether the reading is literal or figurative. If ambiguous, default to FIGURATIVE.
-Step 3: Output the final label formatted exactly as: FINAL LABEL: <FIGURATIVE/LITERAL/INCOHERENT>"""
+Step 1: State the conventional, non-compositional figurative meaning of "{expression}".
+Step 2: State the literal, compositional meaning of "{expression}"'s component words.
+Step 3: Check coherence: is the continuation syntactically well-formed and does it describe an imaginable situation (treating the expression as ordinary words if needed)? If not, the label is INCOHERENT.
+Step 4: If coherent, decide whether the continuation is clearly better supported by the figurative or literal reading.
+  - Physical actions that realize the conventional figurative frame (e.g. bowing on stage after a play, for "take a bow") are still FIGURATIVE.
+  - Only label LITERAL if the component words are used compositionally, outside the figurative frame.
+  - Default to FIGURATIVE if genuinely ambiguous.
+Step 5: Output the final label formatted exactly as: FINAL LABEL: <FIGURATIVE/LITERAL/INCOHERENT>"""
 
 
 def get_device() -> str:
@@ -81,13 +99,28 @@ def load_generation_model(model_name: str = MODEL_NAME, device: Optional[str] = 
     return model, tokenizer, device
 
 
-def load_judge_model(judge_model_name: str = JUDGE_MODEL_NAME, device: Optional[str] = None):
-    """Loads the instruct LLM used for figurative/literal/incoherent labeling."""
+def load_judge_model(judge_model_name: str = JUDGE_MODEL_NAME, device: Optional[str] = None,
+                      load_in_4bit: bool = True):
+    """Loads the instruct LLM used for figurative/literal/incoherent labeling.
+
+    load_in_4bit=True (default) quantizes via bitsandbytes -- required to fit
+    a 14B-class judge on a free-tier Colab GPU. Set False for smaller judges
+    (e.g. the original Qwen2.5-3B-Instruct) where fp16 fits comfortably."""
     device = device or get_device()
     judge_tokenizer = AutoTokenizer.from_pretrained(judge_model_name)
-    judge_model = AutoModelForCausalLM.from_pretrained(
-        judge_model_name, torch_dtype=torch.float16, device_map=device
-    )
+
+    if load_in_4bit:
+        from transformers import BitsAndBytesConfig
+        quant_config = BitsAndBytesConfig(
+            load_in_4bit=True, bnb_4bit_compute_dtype=torch.float16, bnb_4bit_quant_type="nf4",
+        )
+        judge_model = AutoModelForCausalLM.from_pretrained(
+            judge_model_name, quantization_config=quant_config, device_map=device
+        )
+    else:
+        judge_model = AutoModelForCausalLM.from_pretrained(
+            judge_model_name, torch_dtype=torch.float16, device_map=device
+        )
     judge_model.eval()
     return judge_model, judge_tokenizer, device
 
@@ -321,8 +354,8 @@ def run_generation_eval(model, tokenizer, device, eval_df: pd.DataFrame, v_md: n
 # LLM-as-judge labeling (figurative / literal / incoherent)
 # ---------------------------------------------------------------------------
 
-def judge_label(judge_model, judge_tokenizer, device, idiom: str, prefix: str, continuation: str) -> str:
-    prompt = JUDGE_PROMPT_TEMPLATE.format(idiom=idiom, prefix=prefix, continuation=continuation)
+def judge_label(judge_model, judge_tokenizer, device, expression: str, prefix: str, continuation: str) -> str:
+    prompt = JUDGE_PROMPT_TEMPLATE.format(expression=expression, prefix=prefix, continuation=continuation)
     messages = [{"role": "user", "content": prompt}]
 
     inputs = judge_tokenizer.apply_chat_template(
@@ -334,7 +367,7 @@ def judge_label(judge_model, judge_tokenizer, device, idiom: str, prefix: str, c
         out_ids = judge_model.generate(
             input_ids=inputs["input_ids"],
             attention_mask=inputs["attention_mask"],
-            max_new_tokens=80,
+            max_new_tokens=200,
             do_sample=False,
             pad_token_id=judge_tokenizer.eos_token_id,
         )
@@ -354,8 +387,13 @@ def judge_label(judge_model, judge_tokenizer, device, idiom: str, prefix: str, c
 
 
 def run_judge_eval(judge_model, judge_tokenizer, device, in_csv: str, out_csv: str,
-                    key_cols: Sequence[str] = ("idiom", "variant_id", "alpha_factor", "sample_i")) -> pd.DataFrame:
-    """Resumable, checkpointed labeling loop mirroring run_generation_eval."""
+                    key_cols: Sequence[str] = ("idiom", "variant_id", "alpha_factor", "sample_i"),
+                    expr_col: str = "idiom") -> pd.DataFrame:
+    """Resumable, checkpointed labeling loop mirroring run_generation_eval.
+
+    `expr_col` names the column holding the target expression (an idiom for
+    the idiom benchmark, a metaphor/simile for the figurative benchmark --
+    pass expr_col="expression" for the latter)."""
     results_df = pd.read_csv(in_csv)
 
     done_keys = set()
@@ -384,7 +422,7 @@ def run_judge_eval(judge_model, judge_tokenizer, device, in_csv: str, out_csv: s
                 continue
 
             label = judge_label(judge_model, judge_tokenizer, device,
-                                 row["idiom"], row["prefix"], row["continuation"])
+                                 row[expr_col], row["prefix"], row["continuation"])
             out_row = {**row.to_dict(), "label": label}
             writer.writerow(out_row)
             f.flush()

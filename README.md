@@ -40,7 +40,8 @@ beyond-idiom-steering/
 └── results/                          # generated artifacts (committed after each Colab run)
     ├── steering_vector_llama3.2-3b.pkl
     ├── raw_idiom_results.csv
-    ├── labeled_idiom_results.csv
+    ├── labeled_idiom_results.csv                    # Qwen2.5-14B-Instruct (4-bit) judge labels
+    ├── labeled_idiom_results_qwen3b_baseline.csv     # archived: original Qwen2.5-3B judge labels
     ├── raw_figurative_results.csv        # produced by Step 3
     └── labeled_figurative_results.csv    # produced by Step 3
 ```
@@ -49,7 +50,7 @@ beyond-idiom-steering/
 
 - **Steering vector training data**: [IdioLink](https://huggingface.co/datasets/Intellexus/IdioLink) (CC-BY-4.0), loaded directly via `datasets.load_dataset("Intellexus/IdioLink", ...)` inside `load_idiolink_pool()` -- no manual download needed. Combines the `indexes` and `queries` configs and applies the paper's exact-surface-form filter.
 - **Idiom evaluation set**: `data/idiom_eval_benchmark_draft.csv` -- 20-idiom, ambiguous-prefix benchmark, 41 rows (idiom x variant).
-- **Figurative extension set**: `data/figurative_eval_benchmark.csv` -- 100 items across 20 expressions: 50 Conventional Metaphor, 25 Novel Metaphor, 25 Simile, each an ambiguous prefix (constructed per the IdioSteer rules: expression is sentence-final, context forces neither reading, both readings plausible, 5 wording-diverse variants per expression). A `gold` column flags one hand-picked, most rigorously bidirectionally-validated variant per expression (20 rows) for judge calibration / spot checks.
+- **Figurative extension set**: `data/figurative_eval_benchmark.csv` -- 100 items across 20 expressions: 50 Conventional Metaphor, 25 Novel Metaphor, 25 Simile, each an ambiguous prefix (constructed per the IdioSteer rules: expression is sentence-final, context forces neither reading, both readings plausible, 5 wording-diverse variants per expression). Columns: `category, expression, variant_id, prefix, gold` (the column is named `expression`, not `idiom` -- these are deliberately non-idiomatic). A `gold` column flags one hand-picked, most rigorously bidirectionally-validated variant per expression (20 rows) for judge calibration / spot checks.
 - **Archived**: `data/archive/figurative_benchmark_draft.csv` -- an earlier 35-item draft (prefixes only, no gold continuations), superseded by `figurative_eval_benchmark.csv`. Kept for reference, not used by any notebook.
 
 ## Method
@@ -59,13 +60,17 @@ Following the original paper's protocol:
 - **Steering vector**: mean-difference between figurative- and literal-class residual activations at a mid-to-late source layer (`v_MD = (h̄_fig − h̄_lit) / ‖h̄_fig − h̄_lit‖`), built once on IdioLink in Step 1 and reused (not rebuilt) in Step 3.
 - **Steering operator**: additive (`h' = h + α·v`), applied cross-layer (vector built at source layer `Ls=14`, injected at earlier layer `Li=2`).
 - **Application**: single-token intervention at the final token of the idiom/figurative expression, prompt-pass-only (no per-token steering during generation).
-- **Evaluation**: LLM-as-judge (Qwen2.5-3B-Instruct, local, structured CoT prompt) labels each continuation as figurative / literal / incoherent; we report literal rate and coherence rate per condition, and (Step 3) per figurative category.
+- **Evaluation**: LLM-as-judge (local, structured CoT prompt: state the figurative meaning, then the literal meaning, then check coherence, then decide) labels each continuation as figurative / literal / incoherent; we report literal rate and coherence rate per condition, and (Step 3) per figurative category.
 - **Model**: `meta-llama/Llama-3.2-3B`, base (non-instruct), fp16.
-- **Coefficient grid**: `alpha_factor ∈ {±1.20, ±2.39, ±3.59, ±4.78, 0.0}` (9 points), `n_samples=5` per condition.
+- **Coefficient grid**: `alpha_factor ∈ {±1.20, ±2.39, ±3.59, ±4.78, 0.0}` (9 points), `n_samples=5` per condition. This exactly matches the paper's calibrated Llama-3.2-3B config (`L_s=14, L_i=2`, Table 4) -- confirmed by fetching and reading the actual paper PDF.
 
-### Known limitation: judge signal is currently weak
+### What the paper actually did for judging (and why the first judge was swapped out)
 
-Step 1's labeled idiom results show a **flat literal rate across the entire alpha grid** (~0.30–0.41, no clear monotonic shift), unlike the sharp effect reported in the paper. Before trusting Step 3's idiom-vs-figurative comparison, this needs to be understood: either (a) the local Qwen2.5-3B-Instruct judge is too noisy to detect a real steering effect, or (b) the steering effect itself is weak in this reproduction (wrong layer, wrong scale, etc.). The sanity-check cells in `step_1_build_vector_and_eval_idioms.ipynb` (raw generations at a few alphas, read by eye) are the fastest way to tell these apart. If the judge is at fault, the fallback discussed but not yet implemented is a GPT-4o judge (prompt already drafted, commented out in the notebook history) for at least a validation subset.
+The Steering Idioms paper's judge is **Gemma-4-31B-it** (Appendix J), selected by benchmarking several candidates (GPT-4o, GPT-4o-mini, Gemini 2.5 Flash, Claude Sonnet 3.5, Claude Haiku, DeepSeek, Llama-3.3-70B-Instruct, Qwen3, Gemma-4-31B-it) across ~14 prompt variants against a 280-item human-annotated gold set (two annotators, Cohen's κ=0.867 inter-annotator agreement). Gemma-4-31B-it won: 90.0% accuracy, κ=0.821 vs. gold.
+
+Step 1's first labeling pass used a local **Qwen2.5-3B-Instruct** judge (small enough to fit alongside the 3B generation model on a free Colab T4) and produced a **flat literal rate across the entire alpha grid** (~0.30–0.41, no clear monotonic shift) -- kept for reference at `results/labeled_idiom_results_qwen3b_baseline.csv`. That's a striking contrast with the paper's own reported result at this exact config (Table 6): baseline literal rate 0.12 → **0.49 at α_factor=−4.78** (only 0.13 at +4.78) -- a sharp, asymmetric shift. Since the steering mechanics (layers, alpha grid, model) are an exact match, this points at the judge as the likely weak link, not the steering vector.
+
+A 31B judge doesn't fit a free-tier Colab GPU even after freeing the generation model, so the judge is now **Qwen2.5-14B-Instruct, 4-bit-quantized** (`load_judge_model(..., load_in_4bit=True)`, needs `bitsandbytes`) -- the largest judge that reliably fits, and a meaningful capacity step up from 3B. The judge prompt was also rewritten to match the paper's structure more closely (Appendix J): state the figurative meaning, then the literal meaning, then check coherence, then decide -- rather than jumping straight to a label -- including the paper's two documented judge failure modes to guard against (don't conflate a literal *physical action* with a literal reading when it realizes the idiom's own conventional frame, e.g. bowing on stage for "take a bow"; don't over-label unusual-but-coherent literal continuations as incoherent). `results/labeled_idiom_results.csv` will hold the new judge's labels once the notebook is rerun.
 
 ## Setup
 
@@ -88,10 +93,10 @@ produces `analysis/summary_by_alpha.csv`, `analysis/summary_by_category_alpha.cs
 
 ## Status
 
-- [x] Protocol extracted from paper
+- [x] Protocol extracted from paper (including the actual judge and layer/alpha config, confirmed by reading the paper PDF directly)
 - [x] Idiom + figurative benchmarks built (figurative benchmark may still need a validation pass)
-- [x] Pipeline built and run: steering vector constructed on real IdioLink data, full idiom eval sweep + judge labeling done
-- [ ] Diagnose flat literal-rate signal in Step 1 idiom results (judge vs. steering effect) -- see "Known limitation" above
+- [x] Pipeline built and run: steering vector constructed on real IdioLink data, full idiom eval sweep + judge labeling done (first pass, Qwen2.5-3B judge -- flat signal, archived as a baseline)
+- [ ] Rerun Step 1 judging with the upgraded Qwen2.5-14B-Instruct (4-bit) judge and confirm the literal-rate shift now looks like the paper's -- see "What the paper actually did for judging" above
 - [ ] Run Step 3: full figurative-benchmark eval sweep + judge labeling
 - [ ] Analysis: idiom vs. figurative literal-rate comparison, by category, qualitative examples
 - [ ] Optional: second steering vector from figurative data + geometry comparison (Step 4)

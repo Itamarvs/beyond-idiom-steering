@@ -49,13 +49,18 @@ MAX_NEW_TOKENS = 50
 # Judge model. The Steering Idioms paper (Appendix J) selected Gemma-4-31B-it
 # after benchmarking several candidates (incl. GPT-4o, Claude Sonnet 3.5,
 # Llama-3.3-70B-Instruct, Qwen3) against a 280-item human-annotated gold set
-# (90.0% accuracy, Cohen's kappa=0.821 vs. gold; human-human kappa=0.867).
-# A 31B judge doesn't fit alongside the 3B generation model on a free-tier
-# Colab GPU even with the generation model freed first, so this uses
-# Qwen2.5-14B-Instruct (4-bit) as the largest judge that reliably fits --
-# a meaningful capacity step up from the original Qwen2.5-3B-Instruct judge,
-# which produced a flat, unreliable literal-rate signal (see README).
-JUDGE_MODEL_NAME = "Qwen/Qwen2.5-14B-Instruct"
+# (90.0% accuracy, Cohen's kappa=0.821 vs. gold; human-human kappa=0.867) --
+# accessed via the OpenRouter API, not self-hosted (Appendix Q). Only the
+# winning judge's score is reported; Qwen3's standing among the candidates
+# is not disclosed. A 31B judge doesn't fit alongside the 3B generation
+# model on a free-tier Colab GPU, so this uses Qwen3-14B (4-bit, the
+# largest judge that reliably fits) as an UNVALIDATED substitute -- it is
+# in the paper's candidate pool (so evidence-adjacent) but was not the
+# winner and has no calibration evidence of its own here. Treat its output
+# as provisional until the small human-calibration pass (see README) is
+# run. This replaced the original Qwen2.5-3B-Instruct judge, which produced
+# a flat, unreliable literal-rate signal.
+JUDGE_MODEL_NAME = "Qwen/Qwen3-14B"
 
 # Structured-reasoning prompt mirroring the paper's judge design (Appendix
 # J): state the figurative meaning, then the literal meaning, then check
@@ -361,13 +366,15 @@ def judge_label(judge_model, judge_tokenizer, device, expression: str, prefix: s
     inputs = judge_tokenizer.apply_chat_template(
         messages, tokenize=True, add_generation_prompt=True,
         return_tensors="pt", return_dict=True,
+        enable_thinking=False,  # Qwen3: answer directly, no <think> preamble --
+                                 # ignored harmlessly by chat templates that don't define it
     ).to(device)
 
     with torch.no_grad():
         out_ids = judge_model.generate(
             input_ids=inputs["input_ids"],
             attention_mask=inputs["attention_mask"],
-            max_new_tokens=200,
+            max_new_tokens=256,
             do_sample=False,
             pad_token_id=judge_tokenizer.eos_token_id,
         )
@@ -375,7 +382,10 @@ def judge_label(judge_model, judge_tokenizer, device, expression: str, prefix: s
     prompt_len = inputs["input_ids"].shape[1]
     response_text = judge_tokenizer.decode(
         out_ids[0][prompt_len:], skip_special_tokens=True
-    ).strip().upper()
+    ).strip()
+    # Safety net in case enable_thinking=False isn't fully honored: strip any
+    # leaked <think>...</think> block before looking for the final label.
+    response_text = re.sub(r"<think>.*?</think>", "", response_text, flags=re.DOTALL).strip().upper()
 
     match = re.search(r"FINAL\s*LABEL\s*:\s*(FIGURATIVE|LITERAL|INCOHERENT)", response_text)
     if match:

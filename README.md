@@ -40,7 +40,7 @@ beyond-idiom-steering/
 └── results/                          # generated artifacts (committed after each Colab run)
     ├── steering_vector_llama3.2-3b.pkl
     ├── raw_idiom_results.csv
-    ├── labeled_idiom_results.csv                    # Qwen2.5-14B-Instruct (4-bit) judge labels
+    ├── labeled_idiom_results.csv                    # Qwen3-14B (4-bit) judge labels
     ├── labeled_idiom_results_qwen3b_baseline.csv     # archived: original Qwen2.5-3B judge labels
     ├── raw_figurative_results.csv        # produced by Step 3
     └── labeled_figurative_results.csv    # produced by Step 3
@@ -70,7 +70,13 @@ The Steering Idioms paper's judge is **Gemma-4-31B-it** (Appendix J), selected b
 
 Step 1's first labeling pass used a local **Qwen2.5-3B-Instruct** judge (small enough to fit alongside the 3B generation model on a free Colab T4) and produced a **flat literal rate across the entire alpha grid** (~0.30–0.41, no clear monotonic shift) -- kept for reference at `results/labeled_idiom_results_qwen3b_baseline.csv`. That's a striking contrast with the paper's own reported result at this exact config (Table 6): baseline literal rate 0.12 → **0.49 at α_factor=−4.78** (only 0.13 at +4.78) -- a sharp, asymmetric shift. Since the steering mechanics (layers, alpha grid, model) are an exact match, this points at the judge as the likely weak link, not the steering vector.
 
-A 31B judge doesn't fit a free-tier Colab GPU even after freeing the generation model, so the judge is now **Qwen2.5-14B-Instruct, 4-bit-quantized** (`load_judge_model(..., load_in_4bit=True)`, needs `bitsandbytes`) -- the largest judge that reliably fits, and a meaningful capacity step up from 3B. The judge prompt was also rewritten to match the paper's structure more closely (Appendix J): state the figurative meaning, then the literal meaning, then check coherence, then decide -- rather than jumping straight to a label -- including the paper's two documented judge failure modes to guard against (don't conflate a literal *physical action* with a literal reading when it realizes the idiom's own conventional frame, e.g. bowing on stage for "take a bow"; don't over-label unusual-but-coherent literal continuations as incoherent). `results/labeled_idiom_results.csv` will hold the new judge's labels once the notebook is rerun.
+Appendix Q also reveals the paper's own judge wasn't self-hosted: Gemma-4-31B-it was accessed via the **OpenRouter API** (temperature 0.0, max_tokens=700; 358,700 calls across the whole project, $91.77 total). A 31B judge doesn't fit a free-tier Colab GPU, and this project isn't adding another paid API subscription, so the judge is now **Qwen3-14B, 4-bit-quantized** (`load_judge_model(..., load_in_4bit=True)`, needs `bitsandbytes`) -- the largest local judge that reliably fits. This is a meaningful capacity step up from the 3B judge, and Qwen3 was in the paper's candidate pool (unlike Qwen2.5), but **it wasn't the winner and its standing among the candidates isn't disclosed** -- the paper only reports the winning judge's score. Treat its labels as provisional until the small human-calibration pass below is run.
+
+`enable_thinking=False` is passed to Qwen3's chat template so it answers directly rather than emitting a `<think>...</think>` reasoning block first (the judge prompt already asks for structured reasoning steps); `judge_label()` also strips any leaked `<think>` block as a safety net in case a template revision doesn't honor the flag.
+
+The judge prompt was also rewritten to match the paper's structure more closely (Appendix J): state the figurative meaning, then the literal meaning, then check coherence, then decide -- rather than jumping straight to a label -- including the paper's two documented judge failure modes to guard against (don't conflate a literal *physical action* with a literal reading when it realizes the idiom's own conventional frame, e.g. bowing on stage for "take a bow"; don't over-label unusual-but-coherent literal continuations as incoherent). `results/labeled_idiom_results.csv` will hold the new judge's labels once the notebook is rerun.
+
+**Still needed regardless of judge choice**: a small human-calibration pass, mirroring the paper's methodology at a scale one person can do -- hand-label ~40 continuations sampled from `results/raw_idiom_results.csv` (mixed across alphas) and compute agreement with the judge. Not yet implemented.
 
 ## Setup
 
@@ -96,7 +102,8 @@ produces `analysis/summary_by_alpha.csv`, `analysis/summary_by_category_alpha.cs
 - [x] Protocol extracted from paper (including the actual judge and layer/alpha config, confirmed by reading the paper PDF directly)
 - [x] Idiom + figurative benchmarks built (figurative benchmark may still need a validation pass)
 - [x] Pipeline built and run: steering vector constructed on real IdioLink data, full idiom eval sweep + judge labeling done (first pass, Qwen2.5-3B judge -- flat signal, archived as a baseline)
-- [ ] Rerun Step 1 judging with the upgraded Qwen2.5-14B-Instruct (4-bit) judge and confirm the literal-rate shift now looks like the paper's -- see "What the paper actually did for judging" above
+- [ ] Rerun Step 1 judging with the upgraded Qwen3-14B (4-bit) judge and confirm the literal-rate shift now looks like the paper's -- see "What the paper actually did for judging" above
+- [ ] Small human-calibration pass (~40 hand-labeled items) to get an actual agreement number for the Qwen3-14B judge, mirroring the paper's methodology at a feasible scale
 - [ ] Run Step 3: full figurative-benchmark eval sweep + judge labeling
 - [ ] Analysis: idiom vs. figurative literal-rate comparison, by category, qualitative examples
 - [ ] Optional: second steering vector from figurative data + geometry comparison (Step 4)

@@ -33,7 +33,7 @@ beyond-idiom-steering/
 ├── analysis/                         # local, CPU-only -- works off committed CSVs in results/
 │   └── compare_idiom_vs_figurative.py               # idiom vs. figurative tables + plot
 ├── data/
-│   ├── idiom_eval_benchmark_draft.csv        # 20-idiom IdiomSteer-style eval set (Step 1)
+│   ├── idiom_eval_benchmark_draft.csv        # 20-idiom IdioSteer eval set, 5 variants/idiom (Step 1)
 │   ├── figurative_eval_benchmark.csv         # 100-item metaphor/simile eval set (Step 2)
 │   └── archive/
 │       └── figurative_benchmark_draft.csv    # superseded first draft, kept for reference only
@@ -49,7 +49,7 @@ beyond-idiom-steering/
 ## Data
 
 - **Steering vector training data**: [IdioLink](https://huggingface.co/datasets/Intellexus/IdioLink) (CC-BY-4.0), loaded directly via `datasets.load_dataset("Intellexus/IdioLink", ...)` inside `load_idiolink_pool()` -- no manual download needed. Combines the `indexes` and `queries` configs and applies the paper's exact-surface-form filter.
-- **Idiom evaluation set**: `data/idiom_eval_benchmark_draft.csv` -- 20-idiom, ambiguous-prefix benchmark, 41 rows (idiom x variant).
+- **Idiom evaluation set**: `data/idiom_eval_benchmark_draft.csv` -- 20-idiom, ambiguous-prefix benchmark, 100 rows (20 idioms x 5 variants), matching IdioSteer's own benchmark size and idiom inventory exactly (Appendix, idiom list + construction constraints extracted directly from the paper PDF; the 20 idioms are `up in the air, in hot water, out of the blue, break the ice, behind bars, on ice, see red, pull someone's leg, at the crossroads, lie low, shut the door on, under the sun, take a bow, have a ball, in stitches, in the pink, green light, rough edges, in the fast lane, spill the beans`). Each prefix ends exactly at the idiom (no post-idiom text) and is written so a continuation is plausible under both a figurative and a literal reading (imbalance in likelihood is fine per the paper's own criterion -- bidirectional plausibility, not balanced probability). Single-author draft; still marked `DRAFT-needs-2nd-annotator-validation` since the paper's own two-independent-annotator dual-completion validation pass hasn't been run against these rows.
 - **Figurative extension set**: `data/figurative_eval_benchmark.csv` -- 100 items across 20 expressions: 50 Conventional Metaphor, 25 Novel Metaphor, 25 Simile, each an ambiguous prefix (constructed per the IdioSteer rules: expression is sentence-final, context forces neither reading, both readings plausible, 5 wording-diverse variants per expression). Columns: `category, expression, variant_id, prefix, gold` (the column is named `expression`, not `idiom` -- these are deliberately non-idiomatic). A `gold` column flags one hand-picked, most rigorously bidirectionally-validated variant per expression (20 rows) for judge calibration / spot checks.
 - **Archived**: `data/archive/figurative_benchmark_draft.csv` -- an earlier 35-item draft (prefixes only, no gold continuations), superseded by `figurative_eval_benchmark.csv`. Kept for reference, not used by any notebook.
 
@@ -86,7 +86,7 @@ pip install -r requirements.txt
 
 Run the notebooks in `notebooks/` on a GPU runtime (Colab T4 or better; both a base LLM and an instruct judge model load sequentially, not concurrently, to fit in 16GB):
 
-1. `step_1_build_vector_and_eval_idioms.ipynb` -- builds and saves the idiom steering vector, evaluates it on `idiom_eval_benchmark_draft.csv`, produces `results/raw_idiom_results.csv` + `results/labeled_idiom_results.csv`.
+1. `step_1_build_vector_and_eval_idioms.ipynb` -- builds and saves the idiom steering vector, evaluates it on `idiom_eval_benchmark_draft.csv` (now 100 rows -- rerun needed to refresh results built against the old 41-row draft), produces `results/raw_idiom_results.csv` + `results/labeled_idiom_results.csv`.
 2. `step_3_eval_figurative_benchmark.ipynb` -- loads the vector Step 1 saved (does **not** rebuild it), first runs a cheap smoke test on just the 20 `gold` rows (`results/raw_figurative_gold_smoketest.csv`) to catch pipeline issues before the full grid, then evaluates the full benchmark, producing `results/raw_figurative_results.csv` + `results/labeled_figurative_results.csv`. Also reports a gold-subset-only breakdown alongside the full and per-category ones.
 
 Then, locally (no GPU needed):

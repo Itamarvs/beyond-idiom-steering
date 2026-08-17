@@ -294,7 +294,8 @@ def steered_generate_batch(model, tokenizer, device, prefix: str, v_md: np.ndarr
             handle.remove()
 
     prompt_len = inputs["input_ids"].shape[1]
-    return [tokenizer.decode(seq[prompt_len:], skip_special_tokens=True) for seq in out_ids]
+    return [tokenizer.decode(seq[prompt_len:], skip_special_tokens=True,
+                              clean_up_tokenization_spaces=False) for seq in out_ids]
 
 
 # ---------------------------------------------------------------------------
@@ -415,7 +416,8 @@ def judge_label_batch(judge_model, judge_tokenizer, device,
     prompt_len = inputs["input_ids"].shape[1]
     labels = []
     for seq in out_ids:
-        response_text = judge_tokenizer.decode(seq[prompt_len:], skip_special_tokens=True).strip()
+        response_text = judge_tokenizer.decode(seq[prompt_len:], skip_special_tokens=True,
+                                                clean_up_tokenization_spaces=False).strip()
         labels.append(_parse_judge_response(response_text))
     return labels
 

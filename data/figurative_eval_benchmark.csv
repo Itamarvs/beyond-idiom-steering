@@ -1,9 +1,9 @@
 category,expression,variant_id,prefix,gold
 Conventional Metaphor,feed the fire,1,"Even as tempers flared around the campfire, he couldn't resist the urge to feed the fire",true
-Conventional Metaphor,feed the fire,2,"While the family argument raged on nearby, she stepped out back to feed the fire",false
+Conventional Metaphor,feed the fire,2,"While tension between her sisters kept simmering around the reunion's evening bonfire, she couldn't help but feed the fire",false
 Conventional Metaphor,feed the fire,3,"Amid growing rumors about the merger, the assistant was quietly told to feed the fire",false
 Conventional Metaphor,feed the fire,4,"As the bonfire crackled beside the heated debate, Marcus leaned in to feed the fire",false
-Conventional Metaphor,feed the fire,5,"With resentment building between the two departments, the consultant seemed determined to feed the fire",false
+Conventional Metaphor,feed the fire,5,"As tension between the two departments built during the retreat's evening campfire, the consultant seemed determined to feed the fire",false
 Conventional Metaphor,build a wall,1,"Fearing another break-in after the burglary, the shaken homeowner decided to build a wall",true
 Conventional Metaphor,build a wall,2,"Worn down by years of petty disputes with his neighbor, Frank finally resolved to build a wall",false
 Conventional Metaphor,build a wall,3,"After the border dispute flared up for the third time, the two nations agreed to build a wall",false
@@ -15,87 +15,87 @@ Conventional Metaphor,open the door,3,"Wanting to welcome her estranged sister b
 Conventional Metaphor,open the door,4,"Still wary of the reporters camped outside, the senator's aide reluctantly agreed to open the door",false
 Conventional Metaphor,open the door,5,"Cautiously optimistic after the ceasefire, the two delegations agreed to open the door",false
 Conventional Metaphor,light the fuse,1,"Furious after learning of the betrayal, the crime boss decided to light the fuse",true
-Conventional Metaphor,light the fuse,2,"Standing behind the safety barrier at the quarry, the demolition crew prepared to light the fuse",false
-Conventional Metaphor,light the fuse,3,"Passing the controversial tax bill at the worst possible moment, the governor managed to light the fuse",false
-Conventional Metaphor,light the fuse,4,"Setting up the finale for the town's anniversary celebration, the fireworks technician moved to light the fuse",false
-Conventional Metaphor,light the fuse,5,"Already furious about the layoffs, the union leader's speech seemed designed to light the fuse",false
-Conventional Metaphor,plant the seeds,1,"Hoping to slowly undermine the CEO's authority in private conversations, the ambitious VP began to plant the seeds",true
-Conventional Metaphor,plant the seeds,2,"Working the freshly tilled field before the spring rains, the farmer went out to plant the seeds",false
-Conventional Metaphor,plant the seeds,3,"Wanting the rumor to spread naturally through the office, she took her time to plant the seeds",false
-Conventional Metaphor,plant the seeds,4,"Kneeling in the community garden with the schoolchildren, the volunteer showed them how to plant the seeds",false
-Conventional Metaphor,plant the seeds,5,"Hoping doubt would grow slowly in the jury's minds, the defense attorney began to plant the seeds",false
+Conventional Metaphor,light the fuse,2,"Frustrated with the ongoing dispute over land rights near the quarry, the foreman was ready to light the fuse",false
+Conventional Metaphor,light the fuse,3,"Amid rising anger over the tax bill during the town's fireworks festival, the governor's aide moved to light the fuse",false
+Conventional Metaphor,light the fuse,4,"Still fuming after the heated town hall meeting, Tony stood at the edge of the neighborhood's fireworks display, ready to light the fuse",false
+Conventional Metaphor,light the fuse,5,"Standing beside the old mining charges while venting about the layoffs, the furious union leader seemed ready to light the fuse",false
+Conventional Metaphor,plant the seeds,1,"While quietly undermining the CEO's authority during the garden club's annual planting day, the ambitious VP began to plant the seeds",true
+Conventional Metaphor,plant the seeds,2,"Determined to restore trust after years of boardroom infighting at the family's seed company, Maria spent her first season out with growers to plant the seeds",false
+Conventional Metaphor,plant the seeds,3,"Wanting the idea to spread naturally among her coworkers, she headed out to the community garden to plant the seeds",false
+Conventional Metaphor,plant the seeds,4,"Hoping to instill in the schoolchildren a lasting love of hard work, the volunteer knelt beside them in the garden to plant the seeds",false
+Conventional Metaphor,plant the seeds,5,"Speaking with reporters gathered in the courthouse's rose garden before the trial resumed, the defense attorney used the recess to plant the seeds",false
 Conventional Metaphor,change gears,1,"Approaching the steep mountain incline, the professional cyclist had to quickly change gears",true
-Conventional Metaphor,change gears,2,"Realizing the client meeting had taken an unexpected turn, the negotiator decided to change gears",false
+Conventional Metaphor,change gears,2,"During the road trip to close the unexpectedly complicated deal, the negotiator had to quickly change gears",false
 Conventional Metaphor,change gears,3,"Realizing the race was slipping away on the final lap, the driver had to quickly change gears",false
-Conventional Metaphor,change gears,4,"Sensing the audience losing interest halfway through, the comedian chose to change gears",false
+Conventional Metaphor,change gears,4,"Weaving through afternoon traffic toward the theater with only minutes before showtime, the comedian had to change gears",false
 Conventional Metaphor,change gears,5,"Noticing the delivery schedule was falling apart, the courier quickly had to change gears",false
-Conventional Metaphor,cut the ties,1,"Finding the hostage bound to the heavy wooden chair, the officer quickly moved to cut the ties",false
-Conventional Metaphor,cut the ties,2,"After years of feeling controlled by her overbearing family, she finally found the strength to cut the ties",false
-Conventional Metaphor,cut the ties,3,"Realizing the overseas supplier had failed them one too many times, the procurement manager decided to cut the ties",true
-Conventional Metaphor,cut the ties,4,"Untangling the mess of cords behind the server rack, the technician set out to cut the ties",false
-Conventional Metaphor,cut the ties,5,"Fed up with the corrupt local union, the frustrated workers voted to cut the ties",false
+Conventional Metaphor,cut the ties,1,"Struggling to untangle the string binding the old family photo albums together, she decided it was finally time to cut the ties",false
+Conventional Metaphor,cut the ties,2,"Untangling the old climbing ropes left behind after the family trip, she finally found the strength to cut the ties",false
+Conventional Metaphor,cut the ties,3,"Untangling the shipment finally freed from the overseas supplier's packaging straps, the procurement manager moved to cut the ties",true
+Conventional Metaphor,cut the ties,4,"Frustrated with the vendor's constant excuses about the server outages, the technician untangled the mess of cords behind the rack and decided it was finally time to cut the ties",false
+Conventional Metaphor,cut the ties,5,"Working to remove the tangled bundle of cables left behind in the old union office, the frustrated maintenance crew moved to cut the ties",false
 Conventional Metaphor,drop the anchor,1,"Tired of drifting from job to job with no place to call home, the sailor finally decided to drop the anchor",true
-Conventional Metaphor,drop the anchor,2,"After decades of restless traveling from city to city, the tired writer finally decided to drop the anchor",false
-Conventional Metaphor,drop the anchor,3,"Realizing the storm was pushing them toward the rocky cliffs, the fisherman rushed to drop the anchor",false
-Conventional Metaphor,drop the anchor,4,"Exhausted from years of chasing new ventures, the entrepreneur decided it was time to drop the anchor",false
+Conventional Metaphor,drop the anchor,2,"After decades sailing restlessly between ports with no place to call home, the tired writer finally decided to drop the anchor",false
+Conventional Metaphor,drop the anchor,3,"Realizing his years of professional wandering were pushing his family apart, the fisherman rushed to drop the anchor",false
+Conventional Metaphor,drop the anchor,4,"Exhausted after years of sailing from port to port chasing new ventures, the entrepreneur decided it was time to drop the anchor",false
 Conventional Metaphor,drop the anchor,5,"Weary of chasing storms up and down the coast for years, the old fisherman finally decided to drop the anchor",false
-Conventional Metaphor,lay the foundation,1,"Standing in the muddy construction site with blueprints in hand, the eager young architect prepared to lay the foundation",true
-Conventional Metaphor,lay the foundation,2,"Meeting privately before the official talks began, the two diplomats worked quietly to lay the foundation",false
-Conventional Metaphor,lay the foundation,3,"Hired to build the new community center from scratch, the local contractors started to lay the foundation",false
-Conventional Metaphor,lay the foundation,4,"Spending the first weeks of the partnership building trust, the co-founders took care to lay the foundation",false
-Conventional Metaphor,lay the foundation,5,"Surveying the empty dirt plot behind the school, the volunteers were ready to lay the foundation",false
-Conventional Metaphor,steer the ship,1,"Navigating through the heavy morning fog on the lake, the captain carefully managed to steer the ship",false
-Conventional Metaphor,steer the ship,2,"Taking over after the founder's sudden departure, the new CEO was left to steer the ship",true
-Conventional Metaphor,steer the ship,3,"Caught in the middle of a sudden storm off the coast, the young sailor struggled to steer the ship",false
-Conventional Metaphor,steer the ship,4,"Brought in after the scandal to restore public trust, the interim director was tasked to steer the ship",false
-Conventional Metaphor,steer the ship,5,"Working the late-night shift alone on the ferry, the tired pilot tried to steer the ship",false
+Conventional Metaphor,lay the foundation,1,"Meeting for the first time to discuss the ambitious new project, the eager young architect prepared to lay the foundation",true
+Conventional Metaphor,lay the foundation,2,"Meeting quietly at the building site before construction officially began, the two diplomats worked to lay the foundation",false
+Conventional Metaphor,lay the foundation,3,"Hired to build trust with the community center's fractured planning committee, the local contractors started to lay the foundation",false
+Conventional Metaphor,lay the foundation,4,"Spending the first weeks on-site after signing the new building contract, the co-founders took care to lay the foundation",false
+Conventional Metaphor,lay the foundation,5,"Surveying the empty dirt plot behind the school for the new after-school program, the volunteers were ready to lay the foundation",false
+Conventional Metaphor,steer the ship,1,"Taking charge amid the heavy uncertainty following the founder's departure, the new captain carefully managed to steer the ship",false
+Conventional Metaphor,steer the ship,2,"Taking over the family's shipping company after the founder's sudden departure, the new captain was left to steer the ship",true
+Conventional Metaphor,steer the ship,3,"Caught in the middle of a sudden storm during the company's leadership crisis, the young captain struggled to steer the ship",false
+Conventional Metaphor,steer the ship,4,"Brought in after the previous captain's scandal to restore public trust, the interim officer was tasked to steer the ship",false
+Conventional Metaphor,steer the ship,5,"Working late into the night trying to hold the struggling ferry company together, the tired new director tried to steer the ship",false
 Novel Metaphor,dismantle the scaffolding,1,"Believing the newly trained apprentice was finally ready to work independently, the mentor decided to dismantle the scaffolding",true
-Novel Metaphor,dismantle the scaffolding,2,"With the exterior plaster repairs on the townhouse finally finished, the crew began to dismantle the scaffolding",false
-Novel Metaphor,dismantle the scaffolding,3,"Ready to let the intern handle client calls without any more oversight, the manager chose to dismantle the scaffolding",false
-Novel Metaphor,dismantle the scaffolding,4,"As the restoration of the old cathedral wrapped up for the season, laborers moved to dismantle the scaffolding",false
-Novel Metaphor,dismantle the scaffolding,5,"Confident the new employee no longer needed daily check-ins, the supervisor decided to dismantle the scaffolding",false
-Novel Metaphor,overwrite the DNA,1,"Hoping to eliminate the aggressive traits passed down through generations of leadership, the new chairman aimed to overwrite the DNA",true
-Novel Metaphor,overwrite the DNA,2,"Working late in the lab to correct the faulty gene sequence, the geneticist carefully began to overwrite the DNA",false
-Novel Metaphor,overwrite the DNA,3,"Determined to change the company's cutthroat culture once and for all, the incoming director planned to overwrite the DNA",false
-Novel Metaphor,overwrite the DNA,4,"Adjusting the heirloom crop strain to survive the drought, the agronomist worked to overwrite the DNA",false
-Novel Metaphor,overwrite the DNA,5,"Convinced the family business needed a completely different identity, the new owner set out to overwrite the DNA",false
-Novel Metaphor,drain the aquarium,1,"Disgusted by the toxic gossip and politics inside the office, the new manager decided to drain the aquarium",true
-Novel Metaphor,drain the aquarium,2,"Noticing the fish were falling ill from an unknown contaminant, the curator chose to drain the aquarium",false
-Novel Metaphor,drain the aquarium,3,"Tired of the murky, unresolved disputes dragging the whole team down, the executive finally decided to drain the aquarium",false
-Novel Metaphor,drain the aquarium,4,"Preparing the tank for the incoming shipment of coral, the pet store owner needed to drain the aquarium",false
-Novel Metaphor,drain the aquarium,5,"Convinced the department's stagnant culture needed a total reset, the director decided to drain the aquarium",false
-Novel Metaphor,recalibrate the compass,1,"Feeling adrift after months without any clear direction from leadership, the new hire tried to recalibrate the compass",true
-Novel Metaphor,recalibrate the compass,2,"Lost deep in the backcountry with the trail markers long gone, the hiker stopped to recalibrate the compass",false
-Novel Metaphor,recalibrate the compass,3,"Questioning whether the company had strayed from its founding values, the board decided to recalibrate the compass",false
-Novel Metaphor,recalibrate the compass,4,"Noticing the readings had drifted after the long voyage, the navigator paused to recalibrate the compass",false
-Novel Metaphor,recalibrate the compass,5,"Worried the whole team had lost sight of its original mission, the founder called a retreat to recalibrate the compass",false
+Novel Metaphor,dismantle the scaffolding,2,"With the trainee's on-the-job training finally coming to an end, the construction supervisor decided it was time to dismantle the scaffolding",false
+Novel Metaphor,dismantle the scaffolding,3,"Confident her newly trained crew member no longer needed the support structure around the renovation site, the site manager chose to dismantle the scaffolding",false
+Novel Metaphor,dismantle the scaffolding,4,"As the cathedral restoration project's newest apprentice finished his closely supervised first months, the senior laborers moved to dismantle the scaffolding",false
+Novel Metaphor,dismantle the scaffolding,5,"Confident the newly trained employee no longer needed the daily support structure at the renovation site, the supervisor decided to dismantle the scaffolding",false
+Novel Metaphor,overwrite the DNA,1,"Working to root out generations of aggressive habits at the family firm's breeding stables, the new manager aimed to overwrite the DNA",true
+Novel Metaphor,overwrite the DNA,2,"Working late to correct the toxic culture passed down for years, the new lab director carefully began to overwrite the DNA",false
+Novel Metaphor,overwrite the DNA,3,"Determined to change the lab's cutthroat, competitive culture once and for all, the incoming director planned to overwrite the DNA",false
+Novel Metaphor,overwrite the DNA,4,"Adjusting the family firm's old-fashioned approach to survive the economic downturn, the new agronomist-turned-CEO worked to overwrite the DNA",false
+Novel Metaphor,overwrite the DNA,5,"Convinced the family firm's champion bloodline needed a completely different set of traits, the new owner set out to overwrite the DNA",false
+Novel Metaphor,drain the aquarium,1,"Disgusted by how toxic things had gotten around the office's murky lobby fish tank, the new manager decided to drain the aquarium",true
+Novel Metaphor,drain the aquarium,2,"Noticing morale collapsing under the weight of constant backstabbing, the new curator chose to drain the aquarium",false
+Novel Metaphor,drain the aquarium,3,"Tired of the murky, unresolved disputes dragging down morale near the lobby's massive fish tank, the building's executive finally decided to drain the aquarium",false
+Novel Metaphor,drain the aquarium,4,"Preparing the aquarium exhibit's education department for a fresh start after months of stagnant office politics, the new director needed to drain the aquarium",false
+Novel Metaphor,drain the aquarium,5,"Convinced the department's stagnant culture needed a total reset before the gala, the museum director decided to drain the aquarium",false
+Novel Metaphor,recalibrate the compass,1,"Feeling adrift without any clear direction after months on the job, the new hire stopped during the team's wilderness retreat to recalibrate the compass",true
+Novel Metaphor,recalibrate the compass,2,"Feeling lost in her new career with no clear sense of direction, the hiker paused on the trail to recalibrate the compass",false
+Novel Metaphor,recalibrate the compass,3,"Wondering if the expedition itself had drifted from its founding purpose after days off course, the board of the exploration company decided to recalibrate the compass",false
+Novel Metaphor,recalibrate the compass,4,"Steering the company retreat's boat through heavy fog with the crew growing anxious, the navigator-turned-CEO paused to recalibrate the compass",false
+Novel Metaphor,recalibrate the compass,5,"Worried the whole expedition team had lost sight of the trail after days in the wilderness, the founder called a halt to recalibrate the compass",false
 Novel Metaphor,reset the thermostat,1,"Sensing the tension had grown unbearable after the heated exchange, the mediator suggested they reset the thermostat",true
-Novel Metaphor,reset the thermostat,2,"Shivering through another freezing night in the old farmhouse, they finally decided to reset the thermostat",false
-Novel Metaphor,reset the thermostat,3,"Worried the office atmosphere had turned toxic after the layoffs, the new manager tried to reset the thermostat",false
-Novel Metaphor,reset the thermostat,4,"Sweating through the overheated apartment all summer, the tenant begged the landlord to reset the thermostat",false
-Novel Metaphor,reset the thermostat,5,"Noticing how quickly the friendly rivalry had curdled into resentment, the coach called a meeting to reset the thermostat",false
+Novel Metaphor,reset the thermostat,2,"Growing weary of the icy silence between them after another freezing night of arguments, they finally decided to reset the thermostat",false
+Novel Metaphor,reset the thermostat,3,"Noticing the office had grown unbearably hot just as tensions rose after the layoffs, the new manager tried to reset the thermostat",false
+Novel Metaphor,reset the thermostat,4,"Sweating through months of overheated arguments with her landlord all summer, the tenant begged him to reset the thermostat",false
+Novel Metaphor,reset the thermostat,5,"Noticing how quickly the locker room had grown stiflingly hot just as the friendly rivalry curdled into resentment, the coach called for someone to reset the thermostat",false
 Simile,like a severed cable,1,"After the storm knocked out the relay station, the connection between the two offices hung like a severed cable",true
-Simile,like a severed cable,2,"Ever since the ugly falling-out at the reunion, the connection between the two old friends felt like a severed cable",false
+Simile,like a severed cable,2,"Ever since the video call cut out abruptly during their argument, the connection between the two old friends felt like a severed cable",false
 Simile,like a severed cable,3,"Ever since the mentor stopped returning his calls, the connection between them felt like a severed cable",false
 Simile,like a severed cable,4,"Following the CEO's abrupt resignation, the connection between headquarters and the regional branch felt like a severed cable",false
 Simile,like a severed cable,5,"After the interpreter's equipment failed mid-negotiation, the connection between the two delegations hung like a severed cable",false
 Simile,like a rusted lock,1,"Ever since budget cuts ended the night shift, the factory's old control mechanism groaned like a rusted lock",false
-Simile,like a rusted lock,2,"Exposed to years of winter rain, the old gate's mechanism groaned like a rusted lock",false
-Simile,like a rusted lock,3,"After months without a single team meeting, the committee's internal gears felt like a rusted lock",false
-Simile,like a rusted lock,4,"Corroded by years of salt spray, the ship's steering mechanism turned like a rusted lock",true
-Simile,like a rusted lock,5,"Neglected since the founder's retirement, the company's hiring machinery had become like a rusted lock",false
+Simile,like a rusted lock,2,"Left unused since the joint venture fell through years ago, the old partnership's machinery groaned like a rusted lock",false
+Simile,like a rusted lock,3,"Left idle since the factory's funding dried up, the assembly line's control mechanism felt like a rusted lock",false
+Simile,like a rusted lock,4,"Worn down by years of neglect after the founder's exit, the shipping company's steering mechanism turned like a rusted lock",true
+Simile,like a rusted lock,5,"Neglected since the founder's retirement, the machinery running the company had become like a rusted lock",false
 Simile,like an overgrown garden,1,"Abandoned for five years after the corporate bankruptcy, the central courtyard looked like an overgrown garden",true
-Simile,like an overgrown garden,2,"Left without any real oversight after the reorg, the research project had grown like an overgrown garden",false
-Simile,like an overgrown garden,3,"Untouched since her grandmother passed away, the backyard had become like an overgrown garden",false
-Simile,like an overgrown garden,4,"Neglected through multiple changes in leadership, the whole filing system had grown like an overgrown garden",false
-Simile,like an overgrown garden,5,"Untended since the retirement home's east wing closed, the courtyard plants sprawled like an overgrown garden",false
-Simile,like a corrupted file,1,"Garbled after the sudden power surge, the server's backup archive behaved like a corrupted file",false
-Simile,like a corrupted file,2,"Ever since the concussion, his memory of that entire summer felt like a corrupted file",true
-Simile,like a corrupted file,3,"Scrambled by the interference near the transmitter, the pilot's radio message sounded like a corrupted file",false
-Simile,like a corrupted file,4,"Distorted after years of being retold at family gatherings, the old story had become like a corrupted file",false
-Simile,like a corrupted file,5,"Altered by the unauthorized edits during the outage, the transaction log looked like a corrupted file",false
-Simile,like an empty vault,1,"Stripped clean by the previous tenants before foreclosure, the abandoned bank hall felt like an empty vault",false
-Simile,like an empty vault,2,"Drained of any new ideas after years of repetitive sequels, the once-beloved franchise felt like an empty vault",true
-Simile,like an empty vault,3,"Cleared out for the scheduled renovation, the old museum storeroom felt like an empty vault",false
-Simile,like an empty vault,4,"Exhausted after months of nonstop giving, her patience for other people's problems felt like an empty vault",false
-Simile,like an empty vault,5,"Emptied overnight after the sudden bankruptcy auction, the convention center felt like an empty vault",false
+Simile,like an overgrown garden,2,"Left without any real oversight after the reorg, the family-run landscaping business had grown like an overgrown garden",false
+Simile,like an overgrown garden,3,"Untouched since her grandmother passed away, the old family estate had grown like an overgrown garden",false
+Simile,like an overgrown garden,4,"Left unsupervised through multiple changes in leadership, the community garden committee's plot assignments had grown like an overgrown garden",false
+Simile,like an overgrown garden,5,"Left unmanaged since the retirement home's east wing closed, the garden club's plot assignments had sprawled like an overgrown garden",false
+Simile,like a corrupted file,1,"Garbled after the bitter argument during their video call, communication between the two old friends behaved like a corrupted file",false
+Simile,like a corrupted file,2,"Ever since the concussion during finals week, his notes from that entire semester read like a corrupted file",true
+Simile,like a corrupted file,3,"Ever since the emotional breakdown mid-flight, the pilot's account of the incident sounded like a corrupted file",false
+Simile,like a corrupted file,4,"Passed down and copied so many times across family retellings and old backup drives, the story had become like a corrupted file",false
+Simile,like a corrupted file,5,"Altered by decades of embellishment every time it was recorded and re-recorded into the family archive, the oral history looked like a corrupted file",false
+Simile,like an empty vault,1,"Drained by years of underinvestment and turnover, the once-thriving branch office felt like an empty vault",false
+Simile,like an empty vault,2,"Drained of any new material after years of stalling sequels, the film studio's once-famous archive felt like an empty vault",true
+Simile,like an empty vault,3,"Depleted after years of overspending with no oversight, the family trust felt like an empty vault",false
+Simile,like an empty vault,4,"Exhausted after months of nonstop giving, the charity's reserve fund felt like an empty vault",false
+Simile,like an empty vault,5,"Emptied overnight after the sudden bankruptcy auction, the museum's once-renowned collection felt like an empty vault",false

@@ -38,12 +38,15 @@ beyond-idiom-steering/
 │   └── archive/
 │       └── figurative_benchmark_draft.csv    # superseded first draft, kept for reference only
 └── results/                          # generated artifacts (committed after each Colab run)
-    ├── steering_vector_llama3.2-3b.pkl
-    ├── raw_idiom_results.csv
-    ├── labeled_idiom_results.csv                    # Qwen3-14B (4-bit) judge labels
-    ├── labeled_idiom_results_qwen3b_baseline.csv     # archived: original Qwen2.5-3B judge labels
-    ├── raw_figurative_results.csv        # produced by Step 3
-    └── labeled_figurative_results.csv    # produced by Step 3
+    ├── steering_vector_llama3.2-3b.pkl              # still valid -- built only from IdioLink,
+    │                                                 #  unaffected by the benchmark rebuild below
+    └── archive/                                     # superseded artifacts, kept for reference,
+        ├── labeled_idiom_results_qwen3b_baseline.csv #  not read by any notebook
+        ├── raw_idiom_results.csv                     #  the four below predate the 2026-08-18
+        ├── labeled_idiom_results.csv                 #  benchmark rebuild (idiom_eval_benchmark_
+        ├── raw_figurative_results.csv                #  draft.csv went from 41 to 100 rows,
+        └── labeled_figurative_results.csv            #  figurative_eval_benchmark.csv was rebuilt
+                                                       #  from scratch)
 ```
 
 ## Data
@@ -68,7 +71,7 @@ Following the original paper's protocol:
 
 The Steering Idioms paper's judge is **Gemma-4-31B-it** (Appendix J), selected by benchmarking several candidates (GPT-4o, GPT-4o-mini, Gemini 2.5 Flash, Claude Sonnet 3.5, Claude Haiku, DeepSeek, Llama-3.3-70B-Instruct, Qwen3, Gemma-4-31B-it) across ~14 prompt variants against a 280-item human-annotated gold set (two annotators, Cohen's κ=0.867 inter-annotator agreement). Gemma-4-31B-it won: 90.0% accuracy, κ=0.821 vs. gold.
 
-Step 1's first labeling pass used a local **Qwen2.5-3B-Instruct** judge (small enough to fit alongside the 3B generation model on a free Colab T4) and produced a **flat literal rate across the entire alpha grid** (~0.30–0.41, no clear monotonic shift) -- kept for reference at `results/labeled_idiom_results_qwen3b_baseline.csv`. That's a striking contrast with the paper's own reported result at this exact config (Table 6): baseline literal rate 0.12 → **0.49 at α_factor=−4.78** (only 0.13 at +4.78) -- a sharp, asymmetric shift. Since the steering mechanics (layers, alpha grid, model) are an exact match, this points at the judge as the likely weak link, not the steering vector.
+Step 1's first labeling pass used a local **Qwen2.5-3B-Instruct** judge (small enough to fit alongside the 3B generation model on a free Colab T4) and produced a **flat literal rate across the entire alpha grid** (~0.30–0.41, no clear monotonic shift) -- kept for reference at `results/archive/labeled_idiom_results_qwen3b_baseline.csv`. That's a striking contrast with the paper's own reported result at this exact config (Table 6): baseline literal rate 0.12 → **0.49 at α_factor=−4.78** (only 0.13 at +4.78) -- a sharp, asymmetric shift. Since the steering mechanics (layers, alpha grid, model) are an exact match, this points at the judge as the likely weak link, not the steering vector.
 
 Appendix Q also reveals the paper's own judge wasn't self-hosted: Gemma-4-31B-it was accessed via the **OpenRouter API** (temperature 0.0, max_tokens=700; 358,700 calls across the whole project, $91.77 total). A 31B judge doesn't fit a free-tier Colab GPU, and this project isn't adding another paid API subscription, so the judge is now **Qwen3-14B, 4-bit-quantized** (`load_judge_model(..., load_in_4bit=True)`, needs `bitsandbytes`) -- the largest local judge that reliably fits. This is a meaningful capacity step up from the 3B judge, and Qwen3 was in the paper's candidate pool (unlike Qwen2.5), but **it wasn't the winner and its standing among the candidates isn't disclosed** -- the paper only reports the winning judge's score. Treat its labels as provisional until the small human-calibration pass below is run.
 
@@ -86,8 +89,10 @@ pip install -r requirements.txt
 
 Run the notebooks in `notebooks/` on a GPU runtime (Colab T4 or better; both a base LLM and an instruct judge model load sequentially, not concurrently, to fit in 16GB):
 
-1. `step_1_build_vector_and_eval_idioms.ipynb` -- builds and saves the idiom steering vector, evaluates it on `idiom_eval_benchmark_draft.csv` (now 100 rows -- rerun needed to refresh results built against the old 41-row draft), produces `results/raw_idiom_results.csv` + `results/labeled_idiom_results.csv`.
-2. `step_3_eval_figurative_benchmark.ipynb` -- loads the vector Step 1 saved (does **not** rebuild it), first runs a cheap smoke test on just the 20 `gold` rows (`results/raw_figurative_gold_smoketest.csv`) to catch pipeline issues before the full grid, then evaluates the full benchmark, producing `results/raw_figurative_results.csv` + `results/labeled_figurative_results.csv`. Also reports a gold-subset-only breakdown alongside the full and per-category ones. `figurative_eval_benchmark.csv` was rebuilt from scratch (see Data section) -- any existing results under `results/` predate this and need a rerun.
+1. `step_1_build_vector_and_eval_idioms.ipynb` -- loads (or, if missing, builds and saves) the idiom steering vector, evaluates it on `idiom_eval_benchmark_draft.csv` (100 rows), producing `results/raw_idiom_results.csv` + `results/labeled_idiom_results.csv`.
+2. `step_3_eval_figurative_benchmark.ipynb` -- loads the vector Step 1 saved (does **not** rebuild it), first runs a cheap smoke test on just the 20 `gold` rows (`results/raw_figurative_gold_smoketest.csv`) to catch pipeline issues before the full grid, then evaluates the full benchmark, producing `results/raw_figurative_results.csv` + `results/labeled_figurative_results.csv`. Also reports a gold-subset-only breakdown alongside the full and per-category ones.
+
+The old results generated against the pre-rebuild benchmarks (41-row idiom draft, first-pass figurative draft) are archived at `results/archive/` -- kept for reference, not read by either notebook. Both notebooks write fresh output straight to `results/` (not `results/archive/`), so just rerun them; nothing needs to be moved by hand afterward.
 
 Then, locally (no GPU needed):
 
@@ -100,11 +105,11 @@ produces `analysis/summary_by_alpha.csv`, `analysis/summary_by_category_alpha.cs
 ## Status
 
 - [x] Protocol extracted from paper (including the actual judge and layer/alpha config, confirmed by reading the paper PDF directly)
-- [x] Idiom + figurative benchmarks built (figurative benchmark may still need a validation pass)
-- [x] Pipeline built and run: steering vector constructed on real IdioLink data, full idiom eval sweep + judge labeling done (first pass, Qwen2.5-3B judge -- flat signal, archived as a baseline)
-- [ ] Rerun Step 1 judging with the upgraded Qwen3-14B (4-bit) judge and confirm the literal-rate shift now looks like the paper's -- see "What the paper actually did for judging" above
+- [x] Idiom + figurative benchmarks rebuilt to 100 rows each and passed a dual-annotator validation protocol (see `validation/annotator_prompt.md`), converged after several revision rounds -- both bidirectionally ambiguous per-row and confirmed non-idiomatic (compositional) where relevant
+- [x] Pipeline built and run: steering vector constructed on real IdioLink data (still valid -- unaffected by the benchmark rebuild, no need to rebuild it)
+- [ ] Rerun Step 1's idiom eval sweep + Qwen3-14B (4-bit) judge labeling against the rebuilt 100-row benchmark and confirm the literal-rate shift now looks like the paper's -- see "What the paper actually did for judging" above. (Old results predating the rebuild are archived at `results/archive/` for reference, not read by the notebook.)
 - [ ] Small human-calibration pass (~40 hand-labeled items) to get an actual agreement number for the Qwen3-14B judge, mirroring the paper's methodology at a feasible scale
-- [ ] Run Step 3: full figurative-benchmark eval sweep + judge labeling
+- [ ] Run Step 3: full figurative-benchmark eval sweep + judge labeling against the rebuilt benchmark
 - [ ] Analysis: idiom vs. figurative literal-rate comparison, by category, qualitative examples
 - [ ] Optional: second steering vector from figurative data + geometry comparison (Step 4)
 - [ ] Report, slides, presentation video

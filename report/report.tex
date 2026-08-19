@@ -145,7 +145,8 @@ $\sim$63\% literal split); their evaluation idioms are entirely disjoint from th
 training set, and we follow the same idiom-disjoint separation between vector
 construction and evaluation. For evaluation, we built a 20-idiom, ambiguous-prefix
 benchmark matching IdioSteer's own benchmark size and idiom inventory exactly: 100
-sentences, 5 wording-diverse variants each, over the 20 idioms \emph{up in the air, in
+sentences, 5 wording-diverse variants each, over the 20 idioms IdioSteer selected from
+MAGPIE \citep{magpie}: \emph{up in the air, in
 hot water, out of the blue, break the ice, behind bars, on ice, see red, pull someone's
 leg, at the crossroads, lie low, shut the door on, under the sun, take a bow, have a
 ball, in stitches, in the pink, green light, rough edges, in the fast lane, spill the
@@ -352,7 +353,7 @@ $+4.78$ & 0.34 & 0.56 & 0.10 \\
 
 \textbf{Qualitative flips.} At the item level (majority vote over 5 samples), 31 of 100
 idiom (idiom, variant) pairs flip from majority-figurative at $\alpha=0$ to
-majority-literal at $\alpha=-4.78$, spread across 18 of the 20 idioms, and 24 of 100
+majority-literal at $\alpha=-4.78$, spread across 15 of the 20 idioms, and 24 of 100
 figurative (category, expression, variant) triples show the same pattern (12
 Conventional Metaphor, 10 Simile, 2 Novel Metaphor), a category split that mirrors the
 quantitative deltas in Table~\ref{tab:category} closely. A representative idiom flip,

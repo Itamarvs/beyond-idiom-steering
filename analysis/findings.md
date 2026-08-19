@@ -79,7 +79,7 @@ the most extreme +4.78), with literal rate falling the mirror image. Coherence s
 
 ## 4. Qualitative flips (majority label over 5 samples, FIGURATIVE@0 -> LITERAL@-4.78)
 
-- **Idioms: 31/100** (idiom, variant) pairs flip, spread across 18 of the 20 idioms
+- **Idioms: 31/100** (idiom, variant) pairs flip, spread across 15 of the 20 idioms
   (e.g. `on ice`, `break the ice`, `in the pink`, `green light`, `up in the air`,
   `shut the door on`).
 - **Figurative benchmark: 24/100** (category, expression, variant) triples flip:

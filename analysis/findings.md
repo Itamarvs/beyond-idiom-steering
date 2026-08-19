@@ -54,7 +54,7 @@ the paper far better than before.
   has the most literal-skewed baseline (0.736) and highest incoherent rate at extreme
   alphas (0.088 at +3.59/+4.78 vs 0.04 at baseline), consistent with a ceiling effect
   rather than true insensitivity. On the figurative-pushing side it does move: literal
-  rate falls from 0.736 (baseline) to 0.512-0.656 across alpha in [+1.2, +3.59].
+  rate falls from 0.736 (baseline) to 0.512-0.688 across alpha in [+1.2, +3.59].
 
 Full per-category table: `analysis/summary_by_category_alpha.csv`.
 

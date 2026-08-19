@@ -1,7 +1,7 @@
 """
 Local, CPU-only comparison of idiom vs. figurative-benchmark steering results.
 
-Runs entirely off the committed labeled CSVs in results/ -- no GPU, no model
+Runs entirely off the committed labeled CSVs in results/; no GPU, no model
 downloads. Produces the tables and plot used in the report's "Results and
 Analysis" section (Step 3 / Step 5 of the project plan).
 
@@ -69,7 +69,7 @@ def main():
     print()
 
     # --- Table 3: gold subset only (one rigorously-validated variant per ----
-    # expression) -- a higher-confidence read, less sensitive to any one
+    # expression), a higher-confidence read, less sensitive to any one
     # borderline prefix in the full 5-variants-per-expression set.
     if "gold" in fig_df.columns:
         gold_df = fig_df[fig_df["gold"]]

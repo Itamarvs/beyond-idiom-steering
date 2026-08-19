@@ -36,7 +36,7 @@ signal than the previous pass (41-row idiom draft), where the idiom curve was
 non-monotonic and the baseline sat near 0.50. **Idiom delta (alpha=-4.78 vs 0.0):
 +0.166. Figurative delta: +0.116.** Absolute baselines (0.436 idiom, 0.580 figurative)
 are still far from the paper's reported ~0.12 idiom baseline, but the shape of the
-effect -- monotonic-ish, bidirectional, high-coherence -- now qualitatively matches
+effect (monotonic-ish, bidirectional, high-coherence) now qualitatively matches
 the paper far better than before.
 
 ## 2. By figurative category (delta = alpha -4.78 vs 0.0, literal rate)
@@ -47,12 +47,12 @@ the paper far better than before.
 | Conventional Metaphor | +0.108 | 0.548 | 0.656 |
 | Novel Metaphor | -0.008 (flat) | 0.736 | 0.728 |
 
-- **Simile** shows the strongest transfer of any category -- a bigger literal-rate
+- **Simile** shows the strongest transfer of any category: a bigger literal-rate
   swing than idioms themselves (+0.256 vs +0.166).
 - **Conventional Metaphor** transfers in the same direction as idioms, more modestly.
 - **Novel Metaphor** again shows no effect in the literal-pushing direction, and again
   has the most literal-skewed baseline (0.736) and highest incoherent rate at extreme
-  alphas (0.088 at +3.59/+4.78 vs 0.04 at baseline) -- consistent with a ceiling effect
+  alphas (0.088 at +3.59/+4.78 vs 0.04 at baseline), consistent with a ceiling effect
   rather than true insensitivity. On the figurative-pushing side it does move: literal
   rate falls from 0.736 (baseline) to 0.512-0.656 across alpha in [+1.2, +3.59].
 
@@ -83,11 +83,11 @@ the most extreme +4.78), with literal rate falling the mirror image. Coherence s
   (e.g. `on ice`, `break the ice`, `in the pink`, `green light`, `up in the air`,
   `shut the door on`).
 - **Figurative benchmark: 24/100** (category, expression, variant) triples flip:
-  12 Conventional Metaphor, 10 Simile, 2 Novel Metaphor -- the category split mirrors
+  12 Conventional Metaphor, 10 Simile, 2 Novel Metaphor, a category split mirroring
   the quantitative deltas above (Simile and Conventional Metaphor generalize, Novel
   Metaphor barely does).
 
-**Idiom example ("on ice", variant 1)** -- prefix: *"Unsure if the deal would go
+**Idiom example ("on ice", variant 1)**, prefix: *"Unsure if the deal would go
 through, the executives kept a bottle of champagne on ice"*. Baseline continuations
 read the business-deal-in-waiting sense (FIGURATIVE: "...ready to celebrate the deal
 with a bottle of champagne, but they were unsure if the deal would go through").
@@ -95,7 +95,7 @@ Steered (alpha=-4.78) continuations describe an actual chilled bottle on a physi
 surface (LITERAL: "...deck in case the deal fell through..."; "...hooks on the wall.
 ...the champagne bottle was never returned to the wall.").
 
-**Figurative example ("like a severed cable", Simile, variant 4)** -- prefix:
+**Figurative example ("like a severed cable", Simile, variant 4)**, prefix:
 *"Following the CEO's abrupt resignation, the connection between headquarters and the
 regional branch felt like a severed cable"*. Baseline is mixed (LITERAL/FIGURATIVE/
 INCOHERENT across samples). Steered (alpha=-4.78) continuations consistently
@@ -113,9 +113,12 @@ idioms on the gold subset), a strong transfer to Similes (larger delta than idio
 a moderate transfer to Conventional Metaphors, and a flat, ceiling-limited result for
 Novel Metaphors. The idiom replication itself is also far cleaner than before
 (monotonic-ish, bidirectional, no more non-monotonic positive-alpha spike), though its
-absolute baseline (0.436) is still well above the paper's reported ~0.12 -- a
-benchmark-construction difference, not obviously a judge problem, since the shape of
-the effect is otherwise a good qualitative match. Frame the conclusion as: **broader
+absolute baseline (0.436) is still well above the paper's reported ~0.12. A small
+(n=86) judge-vs-human calibration (see `report/report.tex`, "Judge calibration against
+human labels") gives Cohen's kappa=0.494 against our own hand labels, well below the
+paper's own kappa=0.821, with a literal-leaning judge bias, making judge quality a real,
+evidenced contributor to this gap alongside possible differences in how
+figurative-skewed our validated prefixes are by default. Frame the conclusion as: **broader
 and cleaner support for a general figurative-literal axis than the earlier pass
 showed, with Simile and Conventional Metaphor generalizing most strongly, Novel
 Metaphor showing a ceiling effect rather than true insensitivity, and the idiom

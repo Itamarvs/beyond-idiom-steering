@@ -36,7 +36,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 # ---------------------------------------------------------------------------
 # Config shared across all steps. Keep these fixed once Step 1 has produced
-# a saved vector -- Step 3 asserts the loaded vector's model matches MODEL_NAME.
+# a saved vector; Step 3 asserts the loaded vector's model matches MODEL_NAME.
 # ---------------------------------------------------------------------------
 
 MODEL_NAME = "meta-llama/Llama-3.2-3B"   # base model, not instruct (per paper design)
@@ -49,12 +49,12 @@ MAX_NEW_TOKENS = 50
 # Judge model. The Steering Idioms paper (Appendix J) selected Gemma-4-31B-it
 # after benchmarking several candidates (incl. GPT-4o, Claude Sonnet 3.5,
 # Llama-3.3-70B-Instruct, Qwen3) against a 280-item human-annotated gold set
-# (90.0% accuracy, Cohen's kappa=0.821 vs. gold; human-human kappa=0.867) --
+# (90.0% accuracy, Cohen's kappa=0.821 vs. gold; human-human kappa=0.867),
 # accessed via the OpenRouter API, not self-hosted (Appendix Q). Only the
 # winning judge's score is reported; Qwen3's standing among the candidates
 # is not disclosed. A 31B judge doesn't fit alongside the 3B generation
 # model on a free-tier Colab GPU, so this uses Qwen3-14B (4-bit, the
-# largest judge that reliably fits) as an UNVALIDATED substitute -- it is
+# largest judge that reliably fits) as an UNVALIDATED substitute; it is
 # in the paper's candidate pool (so evidence-adjacent) but was not the
 # winner and has no calibration evidence of its own here. Treat its output
 # as provisional until the small human-calibration pass (see README) is
@@ -64,7 +64,7 @@ JUDGE_MODEL_NAME = "Qwen/Qwen3-14B"
 
 # Structured-reasoning prompt mirroring the paper's judge design (Appendix
 # J): state the figurative meaning, then the literal meaning, then check
-# coherence, then decide -- rather than jumping straight to a label. Guards
+# coherence, then decide, rather than jumping straight to a label. Guards
 # against the paper's two documented judge failure modes: (1) don't conflate
 # a literal *physical action* with a literal reading when that action
 # realizes the idiom's own conventional frame (e.g. bowing on stage for
@@ -108,7 +108,7 @@ def load_judge_model(judge_model_name: str = JUDGE_MODEL_NAME, device: Optional[
                       load_in_4bit: bool = True):
     """Loads the instruct LLM used for figurative/literal/incoherent labeling.
 
-    load_in_4bit=True (default) quantizes via bitsandbytes -- required to fit
+    load_in_4bit=True (default) quantizes via bitsandbytes, required to fit
     a 14B-class judge on a free-tier Colab GPU. Set False for smaller judges
     (e.g. the original Qwen2.5-3B-Instruct) where fp16 fits comfortably."""
     device = device or get_device()
@@ -184,7 +184,7 @@ def collect_activation(model, tokenizer, device, sentence: str, span: str, layer
 
 
 # ---------------------------------------------------------------------------
-# IdioLink loading (Step 1 only -- the pool the idiom steering vector is
+# IdioLink loading (Step 1 only; the pool the idiom steering vector is
 # built from). Kept here so Step 1's notebook stays a thin runner too.
 # ---------------------------------------------------------------------------
 
@@ -319,7 +319,7 @@ def run_generation_eval(model, tokenizer, device, eval_df: pd.DataFrame, v_md: n
         done_keys = set(zip(*[existing[c] for c in key_cols], existing["alpha_factor"]))
         print(f"Resuming: {len(done_keys)} conditions already done.")
     else:
-        print("No existing results file -- starting fresh.")
+        print("No existing results file, starting fresh.")
 
     fieldnames = list(eval_df.columns) + ["alpha_factor", "sample_i", "continuation"]
     write_header = not file_exists
@@ -380,7 +380,7 @@ def _parse_judge_response(response_text: str) -> str:
 
 def judge_label(judge_model, judge_tokenizer, device, expression: str, prefix: str, continuation: str) -> str:
     """Labels a single continuation. For bulk labeling use judge_label_batch /
-    run_judge_eval instead -- one-at-a-time generate() calls are far slower
+    run_judge_eval instead: one-at-a-time generate() calls are far slower
     per item on a GPU than a batched call (T4 + 4-bit 14B: ~25-30s/item
     unbatched vs. roughly batch_size-x faster batched, since decode is
     memory-bandwidth-bound and a batch amortizes the weight-load cost)."""
@@ -398,7 +398,7 @@ def judge_label_batch(judge_model, judge_tokenizer, device,
         text = judge_tokenizer.apply_chat_template(
             [{"role": "user", "content": prompt}],
             tokenize=False, add_generation_prompt=True,
-            enable_thinking=False,  # Qwen3: answer directly, no <think> preamble --
+            enable_thinking=False,  # Qwen3: answer directly, no <think> preamble;
                                      # ignored harmlessly by chat templates that don't define it
         )
         texts.append(text)
@@ -430,26 +430,26 @@ def run_judge_eval(judge_model, judge_tokenizer, device, in_csv: str, out_csv: s
 
     Two independent speed/safety levers:
       - batch_size: judge calls grouped per generate() call. Decode is
-        memory-bandwidth-bound, so a bigger batch is close to free throughput
-        -- unbatched labeling is ~25-30s/item on a T4 with the 4-bit 14B
+        memory-bandwidth-bound, so a bigger batch is close to free throughput:
+        unbatched labeling is ~25-30s/item on a T4 with the 4-bit 14B
         judge (35 hours for ~4,500 items); batching is what makes a full
         sweep fit a session. Raise until you see an OOM, then back off.
       - checkpoint_every: how many *batches* to accumulate in memory before
         writing+syncing to disk (default 1 = write after every batch). Raise
         this to cut disk/Drive-sync overhead if you don't need near-real-time
-        visibility into progress -- a crash loses at most
+        visibility into progress; a crash loses at most
         checkpoint_every * batch_size in-flight items; everything already
         written is safe, and a rerun only redoes what wasn't written.
 
     Each checkpoint write opens, appends, and closes the file (rather than
-    holding one handle open for the whole run) -- on local disk this is
+    holding one handle open for the whole run); on local disk this is
     negligible overhead; on a Google-Drive-mounted out_csv (via Colab's FUSE
     layer), an actively-open handle can leave writes buffered and invisible
     in Drive until it finally closes, so closing per checkpoint is what
     actually forces a sync, not flush() alone.
 
     `expr_col` names the column holding the target expression (an idiom for
-    the idiom benchmark, a metaphor/simile for the figurative benchmark --
+    the idiom benchmark, a metaphor/simile for the figurative benchmark;
     pass expr_col="expression" for the latter)."""
     results_df = pd.read_csv(in_csv)
 
@@ -460,7 +460,7 @@ def run_judge_eval(judge_model, judge_tokenizer, device, in_csv: str, out_csv: s
         done_keys = set(zip(*[existing[c] for c in key_cols]))
         print(f"Resuming: {len(done_keys)} rows already labeled.")
     else:
-        print("No existing labels file -- starting fresh.")
+        print("No existing labels file, starting fresh.")
 
     pending = [row for _, row in results_df.iterrows()
                if tuple(row[c] for c in key_cols) not in done_keys]

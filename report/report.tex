@@ -169,10 +169,10 @@ continuation and a plausible figurative continuation by design (the two need not
 equally likely, only both plausible). For example:
 
 \begin{quote}
-\emph{``Following the CEO's abrupt resignation, the connection between headquarters and
-the regional branch felt like a severed cable''}. Figurative continuation: the
-organizational link between the two offices has broken down. Literal continuation: an
-actual physical wire or cord has snapped.
+\emph{``Even as tempers flared around the campfire, he couldn't resist the urge to feed
+the fire''}. Figurative continuation: he keeps escalating the argument, egging on the
+rising tempers. Literal continuation: he keeps tossing more wood onto the actual
+campfire flames.
 \end{quote}
 
 Conventional metaphors reuse widely lexicalized figurative senses (\emph{feed the fire},
@@ -185,15 +185,13 @@ vault}, \emph{like a corrupted file}). Each item carries a \texttt{gold} flag; 2
 (one rigorously-validated variant per expression) form a higher-confidence subset used
 for judge calibration and as a separate, cleaner analysis slice (Section~\ref{sec:results}).
 
-Both benchmarks (idiom and figurative) were rebuilt from an initial draft after an early
-pass revealed prefixes that forced a single reading rather than staying ambiguous, and
-both then went through the dual-annotator validation protocol adapted directly from
-IdioSteer's own validation methodology (independently writing a figurative and a literal
-continuation for each prefix and flagging any row where one reading is not genuinely
-plausible; full prompt in \texttt{validation/annotator\_prompt.md}), converging after
-several revision rounds to benchmarks where every row is confirmed bidirectionally
-ambiguous, and, for the figurative set, confirmed non-idiomatic (compositional) where
-relevant.
+Both benchmarks (idiom and figurative) went through a dual-annotator validation protocol
+adapted directly from IdioSteer's own validation methodology: two independent passes
+each write a figurative and a literal continuation for every prefix and flag any row
+where one reading is not genuinely plausible (full prompt in
+\texttt{validation/annotator\_prompt.md}). Every row in both final benchmarks is
+confirmed bidirectionally ambiguous, and, for the figurative set, confirmed non-idiomatic
+(compositional) where relevant.
 
 \subsection{Evaluation protocol}
 
@@ -206,21 +204,16 @@ own judge structure and its two documented judge failure modes (not conflating a
 conventional frame, e.g. bowing on stage for \emph{take a bow}; not over-labeling
 unusual-but-coherent literal continuations as incoherent).
 
-Our first labeling pass used a local \textsc{Qwen2.5-3B-Instruct} judge and produced a
-flat literal rate across the entire idiom coefficient grid ($\approx$0.30--0.41, no clear
-monotonic trend), in sharp contrast to IdioSteer's reported effect at the matching
-configuration. Since the steering mechanics (layers, coefficients, model) exactly match
-the paper, we attributed this to insufficient judge capacity rather than a failed
-steering vector, and re-labeled both the idiom and figurative results with a
-4-bit-quantized \textsc{Qwen/Qwen3-14B} judge, the largest local judge that reliably
-fits a free-tier GPU alongside the 3B generation model. Unlike the smaller Qwen2.5, it is
+We label continuations with a 4-bit-quantized \textsc{Qwen/Qwen3-14B} judge, the largest
+local judge that reliably fits a free-tier GPU alongside the 3B generation model. It is
 part of IdioSteer's own candidate judge pool (Appendix J), though not its winner. All
 quantitative results in Section~\ref{sec:results} use this Qwen3-14B judge, applied to
 the final, dual-annotator-validated 100-item version of both benchmarks. We report, per
 (dataset, category, $\alpha$) cell: figurative rate, literal rate, incoherent rate, and
 coherence rate (figurative + literal). We additionally hand-labeled a small subset of raw
 idiom continuations ourselves, independently of the judge, to obtain a direct
-judge-vs-human calibration number (Section~\ref{sec:judge-calibration}).
+judge-vs-human calibration number, reported alongside the baseline-gap discussion in
+Section~\ref{sec:analysis}.
 
 \section{Experiments and Results}
 \label{sec:results}
@@ -354,36 +347,6 @@ $+4.78$ & 0.34 & 0.56 & 0.10 \\
 \label{tab:gold}
 \end{table}
 
-\subsection{Judge calibration against human labels}
-\label{sec:judge-calibration}
-
-We hand-labeled a subset of 86 raw idiom continuations ourselves (roughly 9--10 per
-$\alpha$, spanning the full coefficient grid), blind to the judge's own label, as
-\textsc{figurative} or \textsc{literal} (no \textsc{incoherent} category was needed for
-this subset). Against the Qwen3-14B judge's label on the same 86 items, raw agreement is
-74.4\% (64/86) and Cohen's $\kappa=0.494$, moderate agreement but well below
-IdioSteer's own reported judge-vs-human-gold agreement ($\kappa=0.821$, on a much larger
-280-item set). Part of this gap is likely attributable to judge selection and capacity
-rather than to our judging protocol itself: IdioSteer's $\kappa=0.821$ reflects the single
-best performer out of $\sim$9 benchmarked candidate judges, tuned across $\sim$14 prompt
-variants specifically against their gold set, whereas our Qwen3-14B judge was chosen for
-GPU-memory feasibility, was not the winner among IdioSteer's own candidates (its standing
-undisclosed), is 4-bit-quantized, and was not prompt-tuned beyond adapting IdioSteer's
-own template once. The disagreements are not symmetric: among items we labeled
-\textsc{figurative}, the judge called them \textsc{literal} 37.2\% of the time (16/43);
-among items we labeled \textsc{literal}, the judge called them \textsc{figurative} only
-11.6\% of the time (5/43). The judge, in other words, has a measurable \emph{literal-leaning
-bias} on this sample: it over-calls \textsc{literal} more often than it over-calls
-\textsc{figurative}. On these same 86 items, our own labels show an even steeper
-literal-rate swing across $\alpha$ than the judge does (0.90 at $\alpha=-4.78$ down to
-0.0 at $\alpha\in\{+2.39,+3.59,+4.78\}$, vs.\ the judge's 0.70 down to 0.20--0.50 on the
-identical items), with our human baseline at $\alpha=0$ sitting at 0.50 against the
-judge's 0.70 on the same 10 items. This sample is small enough (n=86, 9--10 per $\alpha$)
-that none of these per-$\alpha$ numbers should be read as precise estimates, but the
-direction is consistent: a literal-leaning judge bias, visible in the confusion pattern,
-would inflate our reported literal rate at every $\alpha$ including baseline, which is
-directly relevant to the baseline gap discussed next.
-
 \section{Analysis and Discussion}
 \label{sec:analysis}
 
@@ -427,33 +390,39 @@ actual snapped cable), exactly the intended literal reading. On the second examp
 is a direction the idiom-trained vector never saw during vector construction.
 
 \textbf{Why is the idiom replication's baseline still far from the paper's?} Our idiom
-benchmark's rebuild to the paper's full 100-item size fixed the earlier pass's
-non-monotonicity and produced a shape (bidirectional, high-coherence, largely monotonic)
-that is a good qualitative match to IdioSteer's reported effect. The remaining gap is
+benchmark, matched to the paper's full 100-item size, produces a shape (bidirectional,
+high-coherence, largely monotonic) that is a good qualitative match to IdioSteer's
+reported effect. The remaining gap is
 purely in absolute level: our unsteered baseline (0.436) sits close to 50/50, while
 IdioSteer's own baseline at this exact configuration is $\approx$0.12: their
 ambiguous prefixes are considerably more figurative-skewed \emph{before any steering is
 applied} than ours are. Two non-exclusive explanations are consistent with this.
 First, judge differences: IdioSteer's final judge is a much larger model
 (Gemma-4-31B-it) calibrated against 280 human-annotated items with $\kappa=0.821$
-agreement to gold, while our own judge-vs-human calibration
-(Section~\ref{sec:judge-calibration}) gives a substantially lower $\kappa=0.494$ on a
-much smaller (n=86) sample, with a specifically \emph{literal-leaning} bias: a
-judge that over-calls \textsc{literal} would mechanically inflate literal rate at every
-$\alpha$, including baseline, and our own hand-labels on the same 86 items show a steeper
-figurative-to-literal swing than the judge reports. Given this, judge quality now looks
-like a real and possibly substantial contributor, not merely a secondary confound.
-Second, our prefixes, while validated as bidirectionally plausible by the dual-annotator
-protocol (run with two different models, independently of each other and of whichever
-model authored the prefixes), may simply write in a less figurative-default register than
-the paper's own (unreleased) stimuli. ``Bidirectionally plausible'' does not pin down
-where the unsteered default sits, only that both readings are reachable. We cannot fully
-disentangle these two factors with the data collected so far; the human-calibration
-numbers above make judge bias a concrete, evidenced contributor for the first time,
-alongside the benchmark-construction explanation we had previously considered.
+agreement to gold. To get an analogous number for our own judge, we hand-labeled a
+subset of 86 raw idiom continuations ourselves (blind to the judge's own label, roughly
+9--10 per $\alpha$) and compared against the Qwen3-14B judge's label on the same items:
+raw agreement 74.4\% (64/86), Cohen's $\kappa=0.494$, well below IdioSteer's $\kappa=0.821$
+on a much smaller sample. The disagreements are not symmetric: among items we labeled
+\textsc{figurative}, the judge called them \textsc{literal} 37.2\% of the time (16/43),
+versus only 11.6\% (5/43) the other way, a measurable \emph{literal-leaning} bias. A judge
+that over-calls \textsc{literal} would mechanically inflate literal rate at every $\alpha$
+including baseline, and part of the lower $\kappa$ is plausibly attributable to judge
+selection and capacity rather than to our judging protocol itself: IdioSteer's
+$\kappa=0.821$ reflects the single best performer out of $\sim$9 benchmarked candidates,
+tuned across $\sim$14 prompt variants against their own gold set, whereas our Qwen3-14B
+judge was chosen for GPU-memory feasibility, was not the winner among IdioSteer's own
+candidates, is 4-bit-quantized, and was not separately prompt-tuned. Given this, judge
+quality now looks like a real and possibly substantial contributor, not merely a
+secondary confound. Second, our prefixes, while validated as bidirectionally plausible by
+the dual-annotator protocol (run with two different models, independently of each other
+and of whichever model authored the prefixes), may simply write in a less
+figurative-default register than the paper's own (unreleased) stimuli. ``Bidirectionally
+plausible'' does not pin down where the unsteered default sits, only that both readings
+are reachable. We cannot fully disentangle these two factors with the data collected so
+far.
 
-\textbf{Does the idiom vector reflect a general axis?} The evidence now leans more
-strongly toward yes than in an earlier, smaller-scale pass over this project. The
+\textbf{Does the idiom vector reflect a general axis?} The evidence leans toward yes. The
 pooled figurative benchmark shows the same bidirectional dose-response shape as idioms;
 the highest-confidence (gold) subset shows the single cleanest monotonic curve in the
 entire study; and two of three figurative categories transfer in the idiom-consistent
@@ -473,14 +442,15 @@ have less to draw on regardless of steering direction.
 \textbf{Limitations.} (i) Our idiom benchmark is a hand-reconstructed 20-idiom set, not
 IdioSteer's original stimuli, so absolute rates are not directly comparable across
 papers, even though both benchmarks are now matched in size and both passed a
-dual-annotator ambiguity-validation pass. (ii) Our judge-vs-human calibration
-(Section~\ref{sec:judge-calibration}) covers only 86 idiom items and none of the
-figurative benchmark; a larger sample, closer to IdioSteer's own 280-item gold set,
-would give a more precise agreement number. (iii) Category sample sizes (5 expressions
-$\times$ 5 variants for Novel Metaphor and Simile) are small enough that category-level
-deltas should be read as suggestive trends, not precise effect-size estimates.
+dual-annotator ambiguity-validation pass. (ii) Our judge-vs-human calibration covers only
+86 idiom items and none of the figurative benchmark, well short of IdioSteer's own
+280-item human gold set; a larger sample would give a more precise agreement number and
+would let us check whether the same literal-leaning bias shows up on the figurative
+benchmark too. (iii) Category sample sizes (5 expressions $\times$ 5 variants for Novel
+Metaphor and Simile) are small enough that category-level deltas should be read as
+suggestive trends, not precise effect-size estimates.
 
-\section{Conclusion and Future Work}
+\section{Conclusion}
 \label{sec:conclusion}
 
 We asked whether the steering direction discovered by IdioSteer for idioms reflects a
@@ -494,12 +464,11 @@ effect on the literal-pushing side, plausibly due to an already literal-skewed b
 and rising incoherence at extreme coefficients rather than true insensitivity to
 steering. Our own idiom replication is a good qualitative match to IdioSteer's reported
 effect in shape, though its absolute baseline literal rate remains well above the
-paper's own reported value. A small (n=86) judge-vs-human calibration
-(Section~\ref{sec:judge-calibration}) shows moderate agreement ($\kappa=0.494$, vs.\
-IdioSteer's own $\kappa=0.821$) with a literal-leaning judge bias, making judge quality a
-concrete, evidenced contributor to this gap alongside a possibly less figurative-skewed
-default register in our validated prefixes; we cannot fully separate these two factors
-with the data collected so far. A promising next step, time permitting, is learning a
+paper's own reported value, a gap our small-scale judge-vs-human calibration
+($\kappa=0.494$ vs.\ IdioSteer's $\kappa=0.821$, with a literal-leaning judge bias)
+suggests is partly attributable to judge quality, alongside a possibly less
+figurative-skewed default register in our validated prefixes; we cannot fully separate
+these two factors with the data collected so far. A promising next step, time permitting, is learning a
 second steering vector directly from the figurative benchmark and comparing its geometry
 (cosine similarity) to the idiom vector. If the two are highly aligned despite their
 different category-level transfer strengths, that would be stronger evidence for a

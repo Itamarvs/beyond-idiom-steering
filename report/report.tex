@@ -163,7 +163,13 @@ finally gave the project the green light''}).
 We built a 100-item benchmark of non-idiomatic figurative expressions, matching the idiom
 benchmark's size and structure exactly: 20 expressions $\times$ 5 wording-diverse
 ambiguous-prefix variants, split into three categories: 10 Conventional Metaphors, 5
-Novel (invented) Metaphors, and 5 Similes (50 / 25 / 25 items respectively). Each item
+Novel (invented) Metaphors, and 5 Similes (50 / 25 / 25 items respectively). The three
+categories are a controlled comparison, not an arbitrary sample: Conventional and Novel
+Metaphor hold syntactic form fixed (a bare verb-phrase assertion, like an idiom) while
+varying conventionality, isolating whether transfer depends on the model having seen the
+figurative sense before; Simile instead varies syntactic form, replacing the bare
+assertion with an explicit \emph{like}/\emph{as} comparison, testing whether transfer
+depends on that idiom-like packaging specifically. Each item
 mirrors the idiom benchmark's construction constraints: an ambiguous prefix ending
 exactly at the figurative expression (no post-idiom text), with both a plausible literal
 continuation and a plausible figurative continuation by design (the two need not be
@@ -317,6 +323,13 @@ Full per-$\alpha$ breakdown in \texttt{analysis/summary\_by\_category\_alpha.csv
 category, all under the single idiom-derived steering vector.}
 \label{fig:main}
 \end{figure}
+
+\textbf{Bottom line per category.} Simile: steering works, transferring even more
+strongly than on idioms themselves. Conventional Metaphor: steering works, transferring
+in the same direction as idioms but more modestly. Novel Metaphor: steering still works,
+but the literal-pushing direction is ceiling-limited by an already literal-skewed
+baseline, so the effect is only clearly visible when pushing toward figurative - not
+evidence that this category is unaffected by the vector.
 
 \subsection{Gold subset: the cleanest curve in the study}
 

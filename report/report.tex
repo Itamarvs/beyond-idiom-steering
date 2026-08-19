@@ -163,20 +163,16 @@ finally gave the project the green light''}).
 We built a 100-item benchmark of non-idiomatic figurative expressions, matching the idiom
 benchmark's size and structure exactly: 20 expressions $\times$ 5 wording-diverse
 ambiguous-prefix variants, split into three categories: 10 Conventional Metaphors, 5
-Novel (invented) Metaphors, and 5 Similes (50 / 25 / 25 items respectively; this
-allocation was fixed early in benchmark construction, see Limitations). We did not set
-these three categories up as a matched factorial design, but they turn out, in hindsight,
-to differ along two dimensions we return to in Section~\ref{sec:analysis}: Conventional
-and Novel Metaphor share the same syntactic form (a bare verb-phrase assertion, like an
-idiom) but differ in conventionality, while Novel Metaphor and Simile are both
-freshly-coined, non-lexicalized figurative senses but differ in syntactic packaging (bare
-assertion vs.\ an explicit \emph{like}/\emph{as} comparison). Reading the category
-results along these two dimensions after the fact, rather than as a flat three-way
-comparison, turns out to be more informative (Section~\ref{sec:analysis}). Each item
-mirrors the idiom benchmark's construction constraints: an ambiguous prefix ending
-exactly at the figurative expression (no post-idiom text), with both a plausible literal
-continuation and a plausible figurative continuation by design (the two need not be
-equally likely, only both plausible). For example:
+Novel (invented) Metaphors, and 5 Similes (50 / 25 / 25 items; this allocation was fixed
+early in benchmark construction, see Limitations). We did not set these up as a matched
+factorial design, but they happen to differ along two dimensions we return to in
+Section~\ref{sec:analysis}: Conventional and Novel Metaphor share the same bare-assertion
+form but differ in conventionality, while Novel Metaphor and Simile are both
+freshly-coined figurative senses that differ mainly in whether the comparison is
+explicit. Each item mirrors the idiom benchmark's construction constraints: an ambiguous
+prefix ending exactly at the figurative expression (no post-idiom text), with both a
+plausible literal and a plausible figurative continuation by design (not necessarily
+equally likely). For example:
 
 \begin{quote}
 \emph{``Even as tempers flared around the campfire, he couldn't resist the urge to feed
@@ -187,19 +183,16 @@ campfire flames.
 
 Conventional metaphors reuse widely lexicalized figurative senses (\emph{feed the fire},
 \emph{build a wall}, \emph{cut the ties}, \emph{plant the seeds}, \emph{steer the ship})
-that are frequent and familiar but, unlike idioms, remain compositional. Following the
-paper's own non-compositionality criterion for idiomaticity, we checked each of the ten
-against the standard substitutability diagnostic for separating a live conventional
-metaphor from a frozen idiom \citep{nunberg}: \emph{plant the seeds of doubt/hope/rebellion}
-all parse compositionally, whereas a true idiom such as \emph{spill the beans} does not
-survive substituting \emph{peas} for \emph{beans}; all ten Conventional Metaphor
-expressions pass. Novel metaphors invent non-lexicalized figurative extensions
+that are frequent but, unlike idioms, remain compositional: e.g.\ \emph{plant the seeds of
+doubt/hope/rebellion} all parse compositionally, whereas a true idiom like \emph{spill the
+beans} does not survive substituting \emph{peas} \citep{nunberg}; all ten pass this
+substitutability check. Novel metaphors invent non-lexicalized figurative extensions
 (\emph{overwrite the DNA}, \emph{drain the aquarium}, \emph{recalibrate the compass}) to
 probe whether compositionality, not just figurativeness, matters; similes use explicit
 \emph{like}/\emph{as} comparisons (\emph{like a severed cable}, \emph{like an empty
-vault}, \emph{like a corrupted file}). Each item carries a \texttt{gold} flag; 20 rows
-(one rigorously-validated variant per expression) form a higher-confidence subset used as
-a separate, cleaner analysis slice (Section~\ref{sec:results}).
+vault}, \emph{like a corrupted file}). A \texttt{gold} flag marks 20 rows (one
+rigorously-validated variant per expression) as a higher-confidence subset, used as a
+separate, cleaner analysis slice (Section~\ref{sec:results}).
 
 Both benchmarks (idiom and figurative) went through a dual-annotator validation protocol
 adapted directly from IdioSteer's own validation methodology: two independent passes
@@ -244,11 +237,9 @@ negative $\alpha$ consistently pushes toward literal, positive $\alpha$ consiste
 pushes toward or past the figurative baseline. Coherence stays $\geq$0.916 in every cell,
 so the vector is not degrading fluency to achieve this shift. The shape of this result
 (monotonic-ish, bidirectional, high-coherence) is a good qualitative match to IdioSteer's
-own reported effect. The one respect in which it still diverges is absolute level: our baseline
-(0.436) sits far above IdioSteer's own reported Llama-3.2-3B baseline at this exact
-configuration ($\approx$0.12, rising to $\approx$0.49 at $\alpha=-4.78$), so our benchmark
-starts closer to 50/50 rather than strongly figurative-skewed, leaving comparatively less
-headroom for the literal-pushing direction. We discuss this gap in
+own reported effect, though its absolute baseline sits far closer to 50/50 than the
+paper's own strongly figurative-skewed baseline at this exact configuration, leaving
+comparatively less headroom for the literal-pushing direction; we discuss this gap in
 Section~\ref{sec:analysis}.
 
 \subsection{Applying the idiom vector to the figurative benchmark}
@@ -327,47 +318,18 @@ category, all under the single idiom-derived steering vector.}
 \label{fig:main}
 \end{figure}
 
-\textbf{Bottom line per category.} Simile: steering works, transferring even more
-strongly than on idioms themselves. Conventional Metaphor: steering works, transferring
-in the same direction as idioms but more modestly. Novel Metaphor: steering still works,
-but the literal-pushing direction is ceiling-limited by an already literal-skewed
-baseline, so the effect is only clearly visible when pushing toward figurative, not
-evidence that this category is unaffected by the vector.
-
 \subsection{Gold subset: the cleanest curve in the study}
 
 The 20-item gold subset (one rigorously-validated variant per figurative expression)
-shows the single cleanest dose-response curve of the entire project (Table~\ref{tab:gold}):
-figurative rate rises almost monotonically from 0.26 at $\alpha=-4.78$ to 0.45 at
-$\alpha=+3.59$ (dipping slightly at the most extreme $\alpha=+4.78$), with literal rate
-falling the mirror image, and coherence staying $\geq$0.90 throughout. That the
-highest-confidence slice of the figurative benchmark shows the cleanest trend in the
-whole study, cleaner than either the pooled figurative benchmark or the idiom
-benchmark itself, is a meaningful positive signal: it is not what we would expect if
-the idiom vector's apparent transfer to figurative language were purely a benchmark or
-judge artifact.
-
-\begin{table}[h]
-\centering
-\small
-\begin{tabular}{@{}rrrr@{}}
-\toprule
-$\alpha$ & figurative rate & literal rate & incoherent rate \\
-\midrule
-$-4.78$ & 0.26 & 0.70 & 0.04 \\
-$-3.59$ & 0.26 & 0.69 & 0.05 \\
-$-2.39$ & 0.26 & 0.70 & 0.04 \\
-$-1.20$ & 0.25 & 0.73 & 0.02 \\
-$0.00$  & 0.31 & 0.64 & 0.05 \\
-$+1.20$ & 0.37 & 0.55 & 0.08 \\
-$+2.39$ & 0.38 & 0.53 & 0.09 \\
-$+3.59$ & 0.45 & 0.49 & 0.06 \\
-$+4.78$ & 0.34 & 0.56 & 0.10 \\
-\bottomrule
-\end{tabular}
-\caption{Gold subset (20 expressions, one variant each, $n=100$/cell).}
-\label{tab:gold}
-\end{table}
+shows the single cleanest dose-response curve of the entire project: figurative rate
+rises almost monotonically from 0.26 at $\alpha=-4.78$ to 0.45 at $\alpha=+3.59$ (dipping
+slightly at the most extreme $\alpha=+4.78$), with literal rate falling the mirror image
+and coherence staying $\geq$0.90 throughout (full breakdown in
+\texttt{analysis/summary\_gold\_by\_alpha.csv}). That the highest-confidence slice of the
+figurative benchmark shows the cleanest trend in the whole study, cleaner than either the
+pooled figurative benchmark or the idiom benchmark itself, is a meaningful positive
+signal: it is not what we would expect if the idiom vector's apparent transfer to
+figurative language were purely a benchmark or judge artifact.
 
 \section{Analysis and Discussion}
 \label{sec:analysis}
@@ -414,8 +376,8 @@ is a direction the idiom-trained vector never saw during vector construction.
 \textbf{Why is the idiom replication's baseline still far from the paper's?} Our idiom
 benchmark, matched to the paper's full 100-item size, produces a shape (bidirectional,
 high-coherence, largely monotonic) that is a good qualitative match to IdioSteer's
-reported effect. The remaining gap is
-purely in absolute level: our unsteered baseline (0.436) sits close to 50/50, while
+reported effect. The remaining gap is purely in absolute level: our unsteered baseline
+(0.436) sits close to 50/50, while
 IdioSteer's own baseline at this exact configuration is $\approx$0.12: their
 ambiguous prefixes are considerably more figurative-skewed \emph{before any steering is
 applied} than ours are. Two non-exclusive explanations are consistent with this.
@@ -432,11 +394,10 @@ that over-calls \textsc{literal} would mechanically inflate literal rate at ever
 including baseline, and part of the lower $\kappa$ is plausibly attributable to judge
 selection and capacity rather than to our judging protocol itself: IdioSteer's
 $\kappa=0.821$ reflects the single best performer out of $\sim$9 benchmarked candidates,
-tuned across $\sim$14 prompt variants against their own gold set, whereas our Qwen3-14B
-judge was chosen for GPU-memory feasibility, was not the winner among IdioSteer's own
-candidates, is 4-bit-quantized, and was not separately prompt-tuned. Given this, judge
-quality now looks like a real and possibly substantial contributor, not merely a
-secondary confound. Second, our prefixes, while validated as bidirectionally plausible by
+tuned across $\sim$14 prompt variants against their own gold set, whereas ours was chosen
+for practicality rather than benchmarked performance. Judge quality therefore looks like
+a real, possibly substantial contributor, not merely a secondary confound. Second, our
+prefixes, while validated as bidirectionally plausible by
 the dual-annotator protocol (run with two different models, independently of each other
 and of whichever model authored the prefixes), may simply write in a less
 figurative-default register than the paper's own (unreleased) stimuli. ``Bidirectionally
@@ -491,27 +452,19 @@ We asked whether the steering direction discovered by IdioSteer for idioms refle
 general figurative-vs-literal axis, or is specific to idioms. Applying the idiom-derived
 vector, unmodified, to a new, paper-scale (100-item), dual-annotator-validated benchmark
 of non-idiomatic figurative expressions, we find broad, largely bidirectional
-generalization, and reading the categories along the two dimensions they happen to differ
-on (Section~\ref{sec:fig-data}) explains part of it: along conventionality (form shared
-across Idiom, Conventional Metaphor, and Novel Metaphor), transfer strength tracks
-conventionality directly (Idiom $>$ Conventional Metaphor $>$ Novel Metaphor); along
-syntactic form (novelty comparable between Simile and Novel Metaphor), an
-explicitly-marked comparison transfers far more readily than a bare metaphorical
-assertion of similar novelty (Simile's $+0.256$, the largest effect in the study, vs.
-Novel Metaphor's $\approx 0$ on the same side). So the idiom vector is not simply ``generalizes'' or
-``doesn't'': it reaches non-idiomatic figurative language most when the expression is
-either conventionalized or explicitly marked as a comparison, and least when it is both
-novel and bare, plausibly a ceiling effect rather than true insensitivity given Novel
-Metaphor's already literal-skewed baseline and rising incoherence at extreme coefficients.
-Our own idiom replication is a good qualitative match to IdioSteer's reported
-effect in shape, though its absolute baseline literal rate remains well above the
-paper's own reported value, a gap our small-scale judge-vs-human calibration
-($\kappa=0.494$ vs.\ IdioSteer's $\kappa=0.821$, with a literal-leaning judge bias)
-suggests is partly attributable to judge quality, alongside a possibly less
-figurative-skewed default register in our validated prefixes; we cannot fully separate
-these two factors with the data collected so far. A promising next step, time permitting, is learning a
-second steering vector directly from the figurative benchmark and comparing its geometry
-(cosine similarity) to the idiom vector. If the two are highly aligned despite their
+generalization, strongest for conventionalized or explicitly-marked expressions
+(Conventional Metaphor, Simile) and weakest for bare, freshly-coined ones (Novel
+Metaphor, plausibly a ceiling effect rather than true insensitivity given its
+already-literal-skewed baseline), a graded pattern along conventionality and syntactic
+form (Section~\ref{sec:analysis}) rather than a flat generalizes-or-not verdict. Our own
+idiom replication is a good qualitative match to IdioSteer's reported effect in shape,
+though its absolute baseline literal rate remains well above the paper's own reported
+value, a gap our small-scale judge-vs-human calibration ($\kappa=0.494$ vs.\ IdioSteer's
+$\kappa=0.821$, with a literal-leaning judge bias) suggests is partly attributable to
+judge quality, alongside a possibly less figurative-skewed default register in our
+validated prefixes. A promising next step, time permitting, is learning a second
+steering vector directly from the figurative benchmark and comparing its geometry
+(cosine similarity) to the idiom vector: if the two are highly aligned despite their
 different category-level transfer strengths, that would be stronger evidence for a
 shared underlying axis than the behavioral comparison alone can provide.
 

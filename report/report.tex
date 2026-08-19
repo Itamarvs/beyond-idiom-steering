@@ -22,6 +22,22 @@ Submitted as final project report for the NLP course, RU, 2026
 \end{center}
 \vspace{1em}
 
+\begin{abstract}
+\emph{Steering Idioms} (IdioSteer) shows that a single mean-difference vector, added to
+an LLM's residual stream, shifts idiom continuations between figurative and literal
+readings. We ask whether this direction reflects a general figurative-vs-literal axis or
+is idiom-specific, by applying the idiom-derived vector, unmodified, to a new 100-item
+benchmark of non-idiomatic figurative expressions (conventional metaphors, novel
+metaphors, similes), built and dual-annotator-validated to match IdioSteer's own idiom
+benchmark in size and structure. We find broad, largely bidirectional generalization,
+strongest for conventionalized or explicitly-marked expressions and weakest for bare,
+novel ones; bootstrap confidence intervals confirm the strongest effects (Simile, Idiom,
+Conventional Metaphor) are statistically robust, while the weakest (Novel Metaphor) is
+not reliably distinguishable from either zero or Conventional Metaphor given its small
+sample. Our own idiom replication matches IdioSteer's reported effect in shape but not
+absolute level, a gap a small human-calibration check traces partly to judge quality.
+\end{abstract}
+
 \section{Introduction}
 
 Idioms such as \emph{``take a bow''} or \emph{``green light''} admit two readings: a
@@ -55,16 +71,13 @@ expressions $\times$ 5 variants, mirroring the idiom side's 20 idioms $\times$ 5
 variants). We compare the figurative/literal rate shift induced by the same vector, at
 the same coefficients, across idioms and each figurative category.
 
-Our main finding is a \textbf{broad, largely bidirectional generalization}: the idiom
-vector shifts literal rate in the expected direction, on data it was never trained on,
-across the pooled figurative benchmark, with Simile transferring even more strongly than
-idioms themselves, Conventional Metaphor transferring more modestly, and Novel Metaphor
-showing a flat effect on the literal-pushing side (plausibly a ceiling effect, discussed
-in Section~\ref{sec:analysis}). Our own idiom replication is also directionally and
-qualitatively consistent with IdioSteer's reported effect (monotonic, bidirectional,
-high-coherence), though its absolute baseline literal rate remains well above the paper's
-own reported baseline, a discrepancy we attribute to benchmark construction rather than
-judge quality (Section~\ref{sec:analysis}).
+Our main finding is a \textbf{broad, largely bidirectional generalization}, strongest for
+conventionalized or explicitly-marked expressions and weakest for bare, novel ones, a
+pattern we quantify with bootstrap confidence intervals rather than point estimates
+alone (Section~\ref{sec:analysis}). Our own idiom replication is directionally and
+qualitatively consistent with IdioSteer's reported effect, though its absolute baseline
+literal rate remains well above the paper's own reported baseline, a gap we trace partly
+to judge quality via a human-calibration check (Section~\ref{sec:analysis}).
 
 \section{Related Work}
 
@@ -146,13 +159,12 @@ training set, and we follow the same idiom-disjoint separation between vector
 construction and evaluation. For evaluation, we built a 20-idiom, ambiguous-prefix
 benchmark matching IdioSteer's own benchmark size and idiom inventory exactly: 100
 sentences, 5 wording-diverse variants each, over the 20 idioms IdioSteer selected from
-MAGPIE \citep{magpie}: \emph{up in the air, in
-hot water, out of the blue, break the ice, behind bars, on ice, see red, pull someone's
-leg, at the crossroads, lie low, shut the door on, under the sun, take a bow, have a
-ball, in stitches, in the pink, green light, rough edges, in the fast lane, spill the
-beans} (idiom list and construction constraints extracted directly from the paper PDF;
-IdioSteer's exact released stimuli were not available to us, so this is a
-hand-reconstructed set in the same style). Each prefix ends at the idiom itself and is
+MAGPIE \citep{magpie} (e.g.\ \emph{up in the air}, \emph{break the ice}, \emph{green
+light}, \emph{spill the beans}; full list in
+\texttt{data/idiom\_eval\_benchmark\_draft.csv}), idiom list and construction constraints
+extracted directly from the paper PDF. IdioSteer's exact released stimuli were not
+available to us, so this is a hand-reconstructed set in the same style. Each prefix ends
+at the idiom itself and is
 written so that a reader cannot tell, from the prefix alone, whether a figurative or
 literal continuation is coming (e.g. \emph{``After months of delays, the city council
 finally gave the project the green light''}).
@@ -280,33 +292,40 @@ Negative $\alpha$ is the literal-pushing direction.}
 
 \subsection{Breakdown by figurative category}
 
-Table~\ref{tab:category} splits the figurative-benchmark result by category. \textbf{Simile}
-shows the largest literal-rate shift of any dataset in this study ($+0.256$, larger than
-idioms' own $+0.166$); \textbf{Conventional Metaphor} shifts in the same direction, more
-modestly ($+0.108$); \textbf{Novel Metaphor} again shows a flat, slightly negative delta
-($-0.008$) on the literal-pushing side. Novel metaphors also have the most
-literal-skewed baseline of the three categories (0.736, vs.\ 0.548 conventional / 0.488
-simile) and the highest incoherent rate at extreme coefficients (0.088 at
-$\alpha\in\{+3.59,+4.78\}$, vs.\ 0.040 at $\alpha=0$), suggesting this category is closer
-to a ceiling where a further literal push has little room to register, rather than being
-unaffected by steering \emph{per se}. Consistent with that reading, novel metaphors do
-move in the expected direction on the figurative-pushing side: literal rate falls from
-0.736 at baseline to 0.512--0.688 across $\alpha \in \{+1.20,\dots,+3.59\}$.
+Table~\ref{tab:category} splits the figurative-benchmark result by category, with
+bootstrap 95\% CIs (5{,}000 resamples over expressions/idioms, the true independent
+sampling unit, since variants and generated samples within one are correlated).
+\textbf{Simile} shows the largest effect in the study, with a CI that excludes both zero
+and Conventional Metaphor's interval: a statistically distinguishable difference, not
+just a larger point estimate. \textbf{Conventional Metaphor} shifts more modestly in the
+same direction. \textbf{Novel Metaphor}'s point estimate is flat, but its CI (from only 5
+expressions) is wide enough to overlap Conventional Metaphor's, so that part of the
+ordering should be read with caution. Novel Metaphor also has the most literal-skewed
+baseline of the three categories (0.736 vs.\ 0.548 / 0.488) and the highest incoherent
+rate at extreme coefficients (0.088 vs.\ 0.040 at baseline), suggesting a ceiling effect
+rather than true insensitivity; consistent with that, it does move on the
+figurative-pushing side (0.736 down to 0.512--0.688 across $\alpha \in
+\{+1.20,\dots,+3.59\}$). Separately, Simile's coherence rate (0.840--0.920) is the lowest
+of any category (others $\geq$0.904 pooled), so its largest-in-the-study effect occurs in
+the condition with the weakest fluency preservation of the four (see Limitations).
 
 \begin{table}[h]
 \centering
 \small
-\begin{tabular}{@{}lrrr@{}}
+\begin{tabular}{@{}lrrrl@{}}
 \toprule
-Category & baseline literal rate ($\alpha=0$) & literal rate at $\alpha=-4.78$ & $\Delta$ \\
+Category & baseline lit.\ rate & lit.\ rate @$-4.78$ & $\Delta$ & 95\% CI \\
 \midrule
-Simile & 0.488 & 0.744 & $+0.256$ \\
-Conventional Metaphor & 0.548 & 0.656 & $+0.108$ \\
-Novel Metaphor & 0.736 & 0.728 & $-0.008$ \\
+Idiom & 0.436 & 0.602 & $+0.166$ & $[0.108, 0.226]$ \\
+Simile & 0.488 & 0.744 & $+0.256$ & $[0.224, 0.296]$ \\
+Conventional Metaphor & 0.548 & 0.656 & $+0.108$ & $[0.056, 0.156]$ \\
+Novel Metaphor & 0.736 & 0.728 & $-0.008$ & $[-0.152, 0.136]$ \\
 \bottomrule
 \end{tabular}
-\caption{Per-category literal rate shift under the maximal literal-pushing coefficient.
-Full per-$\alpha$ breakdown in \texttt{analysis/summary\_by\_category\_alpha.csv}.}
+\caption{Literal rate shift under the maximal literal-pushing coefficient, idiom vs.\
+each figurative category, with bootstrap 95\% CIs over expressions/idioms ($n=20, 10, 5,
+5$ respectively; \texttt{analysis/bootstrap\_category\_ci.py}). Full per-$\alpha$
+breakdown in \texttt{analysis/summary\_by\_category\_alpha.csv}.}
 \label{tab:category}
 \end{table}
 
@@ -410,23 +429,23 @@ reading the categories along the two dimensions they happen to differ on
 (Section~\ref{sec:fig-data}) shows a distinct, interpretable pattern rather than a
 uniform generalizes-or-not verdict. Along \emph{conventionality} (Idiom, Conventional
 Metaphor, and Novel Metaphor share the same bare-assertion form but differ in whether the
-figurative sense is entrenched), transfer strength tracks conventionality directly: Idiom
-($+0.166$) $>$ Conventional Metaphor ($+0.108$) $>$ Novel Metaphor ($\approx 0$ on the
-literal-pushing side), consistent with the vector partly encoding ``has an entrenched
-non-literal sense'' rather than a pure, register-independent literal/figurative
-distinction, though Novel Metaphor's ceiling effect (Section~\ref{sec:results}) means we
-cannot cleanly separate a genuinely weaker effect from a baseline with less room left to
-move. Along \emph{syntactic form} (Simile and Novel Metaphor are both freshly-coined,
-non-lexicalized figurative senses, so far as we can judge by inspection alone, differing
-mainly in whether the comparison is explicit), the contrast is sharp: Simile shows the
-single largest effect in the entire study ($+0.256$), while Novel Metaphor shows none on
-the same side. That gap, between two categories of comparable novelty, suggests syntactic
-packaging alone can account for a swing at least as large as the entire conventionality
-comparison above: an explicitly-marked comparison transfers far more readily than a bare
-metaphorical assertion. Taken together, the idiom vector's reach looks more specific than
-a single figurative-vs-literal axis in the abstract: it responds most to conventionalized
+figurative sense is entrenched), transfer strength orders as Idiom $>$ Conventional
+Metaphor $>$ Novel Metaphor, consistent with the vector partly encoding ``has an
+entrenched non-literal sense'' rather than a pure literal/figurative distinction, though
+(Table~\ref{tab:category}) only the Idiom/Conventional-Metaphor half of that ordering is
+statistically clear: Novel Metaphor's wide CI, from only 5 expressions and compounded by
+its ceiling effect (Section~\ref{sec:results}), cannot be distinguished from Conventional
+Metaphor's. Along \emph{syntactic form} (Simile and Novel Metaphor are both
+freshly-coined, non-lexicalized senses, so far as we can judge by inspection, differing
+mainly in whether the comparison is explicit), the contrast is sharper and statistically
+robust: Simile's CI excludes both zero and Conventional Metaphor's interval, so an
+explicitly-marked comparison transfers far more readily than a bare metaphorical
+assertion of comparable novelty, a swing at least as large as the entire conventionality
+comparison above. Taken together, the idiom vector's reach looks more specific than a
+single figurative-vs-literal axis in the abstract: it responds most to conventionalized
 figurative senses and to explicitly-marked comparisons, and least to bare, freshly-coined
-metaphor.
+metaphor, though the conventionality ordering rests on weaker statistical footing than
+the syntactic-form contrast does.
 
 \textbf{Limitations.} (i) Our idiom benchmark is a hand-reconstructed 20-idiom set, not
 IdioSteer's original stimuli, so absolute rates are not directly comparable across
@@ -437,13 +456,19 @@ dual-annotator ambiguity-validation pass. (ii) Our judge-vs-human calibration co
 would let us check whether the same literal-leaning bias shows up on the figurative
 benchmark too. (iii) The 10/5/5-expression category split is unequal and was not chosen
 to match the conventionality/syntactic-form dimensions it is later read against (Simile
-and Novel Metaphor happen to match at 5 each; Conventional Metaphor does not). Combined with
-the resulting small per-category sample sizes (5 expressions $\times$ 5 variants for
-Novel Metaphor and Simile), category-level deltas should be read as suggestive trends,
-not precise, comparably-powered effect-size estimates. (iv) The Conventional Metaphor /
-idiom boundary check (Section~\ref{sec:fig-data}) is a single-author substitutability
-judgment, not independently cross-checked by a second annotator the way bidirectional
-ambiguity is.
+and Novel Metaphor happen to match at 5 each; Conventional Metaphor does not). The
+resulting small per-category sample sizes (5 expressions for Novel Metaphor and Simile)
+show up directly in the bootstrap CIs (Table~\ref{tab:category}): Novel Metaphor's is
+wide enough to overlap Conventional Metaphor's, so the Idiom $>$ Conventional Metaphor
+$>$ Novel Metaphor ordering should be read with caution even though Simile's and Idiom's
+effects are each individually clear. (iv) The Conventional Metaphor / idiom boundary check
+(Section~\ref{sec:fig-data}) is a single-author substitutability judgment, not
+independently cross-checked by a second annotator the way bidirectional ambiguity is.
+(v) Simile shows the largest effect in the study but also the lowest coherence rate of
+any category (0.840--0.920 vs.\ $\geq$0.904 pooled figurative); we cannot fully rule out
+that a judge is more prone to calling less-fluent continuations \textsc{literal}
+specifically, though a genuine simile-specific steering effect is equally plausible and
+we have no way to adjudicate between the two with the data collected so far.
 
 \section{Conclusion}
 \label{sec:conclusion}

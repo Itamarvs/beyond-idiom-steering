@@ -164,14 +164,15 @@ We built a 100-item benchmark of non-idiomatic figurative expressions, matching 
 benchmark's size and structure exactly: 20 expressions $\times$ 5 wording-diverse
 ambiguous-prefix variants, split into three categories: 10 Conventional Metaphors, 5
 Novel (invented) Metaphors, and 5 Similes (50 / 25 / 25 items respectively; this
-allocation was fixed early in benchmark construction and is not itself a designed
-variable, unlike the categories' content, see Limitations). The three
-categories are a controlled comparison, not an arbitrary sample: Conventional and Novel
-Metaphor hold syntactic form fixed (a bare verb-phrase assertion, like an idiom) while
-varying conventionality, isolating whether transfer depends on the model having seen the
-figurative sense before; Simile instead varies syntactic form, replacing the bare
-assertion with an explicit \emph{like}/\emph{as} comparison, testing whether transfer
-depends on that idiom-like packaging specifically. Each item
+allocation was fixed early in benchmark construction, see Limitations). We did not set
+these three categories up as a matched factorial design, but they turn out, in hindsight,
+to differ along two dimensions we return to in Section~\ref{sec:analysis}: Conventional
+and Novel Metaphor share the same syntactic form (a bare verb-phrase assertion, like an
+idiom) but differ in conventionality, while Novel Metaphor and Simile are both
+freshly-coined, non-lexicalized figurative senses but differ in syntactic packaging (bare
+assertion vs.\ an explicit \emph{like}/\emph{as} comparison). Reading the category
+results along these two dimensions after the fact, rather than as a flat three-way
+comparison, turns out to be more informative (Section~\ref{sec:analysis}). Each item
 mirrors the idiom benchmark's construction constraints: an ambiguous prefix ending
 exactly at the figurative expression (no post-idiom text), with both a plausible literal
 continuation and a plausible figurative continuation by design (the two need not be
@@ -330,7 +331,7 @@ category, all under the single idiom-derived steering vector.}
 strongly than on idioms themselves. Conventional Metaphor: steering works, transferring
 in the same direction as idioms but more modestly. Novel Metaphor: steering still works,
 but the literal-pushing direction is ceiling-limited by an already literal-skewed
-baseline, so the effect is only clearly visible when pushing toward figurative - not
+baseline, so the effect is only clearly visible when pushing toward figurative, not
 evidence that this category is unaffected by the vector.
 
 \subsection{Gold subset: the cleanest curve in the study}
@@ -444,24 +445,25 @@ are reachable. We cannot fully disentangle these two factors with the data colle
 far.
 
 \textbf{Does the idiom vector reflect a general axis?} The evidence leans toward yes, and
-the two axes the benchmark was built to isolate (Section~\ref{sec:fig-data}) each show a
-distinct, interpretable pattern rather than a uniform generalizes-or-not verdict. Along
-the \emph{conventionality} axis (syntactic form held fixed as a bare assertion), transfer
-strength tracks conventionality directly: Idiom ($+0.166$) $>$ Conventional Metaphor
-($+0.108$) $>$ Novel Metaphor ($\approx 0$ on the literal-pushing side), consistent with
-the vector partly encoding ``has an entrenched non-literal sense'' rather than a pure,
-register-independent literal/figurative distinction, though Novel Metaphor's ceiling
-effect (Section~\ref{sec:results}) means we cannot cleanly separate a genuinely weaker
-effect from a baseline with less room left to move. Along the
-\emph{syntactic-form} axis (novelty held fixed: Simile and Novel Metaphor are both
-freshly-coined, compositional expressions with no prior conventional reading, differing
-only in the explicit \emph{like}/\emph{as} marker), the contrast is sharp: Simile shows
-the single largest effect in the entire study ($+0.256$), while Novel Metaphor shows none
-on the same side. Holding novelty constant, syntactic packaging alone accounts for a
-bigger swing than the entire conventionality axis does: an explicitly-marked
-comparison transfers far more readily than a bare metaphorical assertion of identical
-novelty. Taken together, the idiom vector's reach is more specific than a single
-figurative-vs-literal axis in the abstract: it responds most to conventionalized
+reading the categories along the two dimensions they happen to differ on
+(Section~\ref{sec:fig-data}) shows a distinct, interpretable pattern rather than a
+uniform generalizes-or-not verdict. Along \emph{conventionality} (Idiom, Conventional
+Metaphor, and Novel Metaphor share the same bare-assertion form but differ in whether the
+figurative sense is entrenched), transfer strength tracks conventionality directly: Idiom
+($+0.166$) $>$ Conventional Metaphor ($+0.108$) $>$ Novel Metaphor ($\approx 0$ on the
+literal-pushing side), consistent with the vector partly encoding ``has an entrenched
+non-literal sense'' rather than a pure, register-independent literal/figurative
+distinction, though Novel Metaphor's ceiling effect (Section~\ref{sec:results}) means we
+cannot cleanly separate a genuinely weaker effect from a baseline with less room left to
+move. Along \emph{syntactic form} (Simile and Novel Metaphor are both freshly-coined,
+non-lexicalized figurative senses, so far as we can judge by inspection alone, differing
+mainly in whether the comparison is explicit), the contrast is sharp: Simile shows the
+single largest effect in the entire study ($+0.256$), while Novel Metaphor shows none on
+the same side. That gap, between two categories of comparable novelty, suggests syntactic
+packaging alone can account for a swing at least as large as the entire conventionality
+comparison above: an explicitly-marked comparison transfers far more readily than a bare
+metaphorical assertion. Taken together, the idiom vector's reach looks more specific than
+a single figurative-vs-literal axis in the abstract: it responds most to conventionalized
 figurative senses and to explicitly-marked comparisons, and least to bare, freshly-coined
 metaphor.
 
@@ -473,8 +475,8 @@ dual-annotator ambiguity-validation pass. (ii) Our judge-vs-human calibration co
 280-item human gold set; a larger sample would give a more precise agreement number and
 would let us check whether the same literal-leaning bias shows up on the figurative
 benchmark too. (iii) The 10/5/5-expression category split is unequal and was not chosen
-to match the conventionality/syntactic-form axes it is later read against (Simile and
-Novel Metaphor happen to match at 5 each; Conventional Metaphor does not). Combined with
+to match the conventionality/syntactic-form dimensions it is later read against (Simile
+and Novel Metaphor happen to match at 5 each; Conventional Metaphor does not). Combined with
 the resulting small per-category sample sizes (5 expressions $\times$ 5 variants for
 Novel Metaphor and Simile), category-level deltas should be read as suggestive trends,
 not precise, comparably-powered effect-size estimates. (iv) The Conventional Metaphor /
@@ -489,13 +491,14 @@ We asked whether the steering direction discovered by IdioSteer for idioms refle
 general figurative-vs-literal axis, or is specific to idioms. Applying the idiom-derived
 vector, unmodified, to a new, paper-scale (100-item), dual-annotator-validated benchmark
 of non-idiomatic figurative expressions, we find broad, largely bidirectional
-generalization, and the benchmark's two deliberately-varied axes (Section~\ref{sec:fig-data})
-each explain part of it: along conventionality (form held fixed), transfer strength tracks
+generalization, and reading the categories along the two dimensions they happen to differ
+on (Section~\ref{sec:fig-data}) explains part of it: along conventionality (form shared
+across Idiom, Conventional Metaphor, and Novel Metaphor), transfer strength tracks
 conventionality directly (Idiom $>$ Conventional Metaphor $>$ Novel Metaphor); along
-syntactic form (novelty held fixed between Simile and Novel Metaphor), an explicitly-marked
-comparison transfers far more readily than a bare metaphorical assertion of identical
-novelty (Simile's $+0.256$, the largest effect in the study, vs. Novel Metaphor's
-$\approx 0$ on the same side). So the idiom vector is not simply ``generalizes'' or
+syntactic form (novelty comparable between Simile and Novel Metaphor), an
+explicitly-marked comparison transfers far more readily than a bare metaphorical
+assertion of similar novelty (Simile's $+0.256$, the largest effect in the study, vs.
+Novel Metaphor's $\approx 0$ on the same side). So the idiom vector is not simply ``generalizes'' or
 ``doesn't'': it reaches non-idiomatic figurative language most when the expression is
 either conventionalized or explicitly marked as a comparison, and least when it is both
 novel and bare, plausibly a ceiling effect rather than true insensitivity given Novel

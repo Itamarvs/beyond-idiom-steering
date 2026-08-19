@@ -441,22 +441,27 @@ plausible'' does not pin down where the unsteered default sits, only that both r
 are reachable. We cannot fully disentangle these two factors with the data collected so
 far.
 
-\textbf{Does the idiom vector reflect a general axis?} The evidence leans toward yes. The
-pooled figurative benchmark shows the same bidirectional dose-response shape as idioms;
-the highest-confidence (gold) subset shows the single cleanest monotonic curve in the
-entire study; and two of three figurative categories transfer in the idiom-consistent
-direction, with Simile transferring \emph{more} strongly than idioms themselves. This
-would be a strange coincidence if the idiom vector carried no signal at all for
-non-idiomatic figurative language. At the same time, one full category (Novel Metaphor)
-shows no effect in the literal-pushing direction, though, as discussed above, this
-looks more like a ceiling effect (already literal-skewed baseline, rising incoherence at
-extreme coefficients, and a real effect on the figurative-pushing side) than true
-insensitivity to the vector. Taken together, this is compatible with a vector that
-captures a substantial, though not perfectly uniform, component of a general
-figurative-literal axis, one that transfers most readily to expressions whose
-figurative sense is either conventionalized (Simile, Conventional Metaphor, like idioms
-themselves) and less readily to fully novel, on-the-fly figuration where the model may
-have less to draw on regardless of steering direction.
+\textbf{Does the idiom vector reflect a general axis?} The evidence leans toward yes, and
+the two axes the benchmark was built to isolate (Section~\ref{sec:fig-data}) each show a
+distinct, interpretable pattern rather than a uniform generalizes-or-not verdict. Along
+the \emph{conventionality} axis (syntactic form held fixed as a bare assertion), transfer
+strength tracks conventionality directly: Idiom ($+0.166$) $>$ Conventional Metaphor
+($+0.108$) $>$ Novel Metaphor ($\approx 0$ on the literal-pushing side), consistent with
+the vector partly encoding ``has an entrenched non-literal sense'' rather than a pure,
+register-independent literal/figurative distinction, though Novel Metaphor's ceiling
+effect (Section~\ref{sec:results}) means we cannot cleanly separate a genuinely weaker
+effect from a baseline with less room left to move. Along the
+\emph{syntactic-form} axis (novelty held fixed: Simile and Novel Metaphor are both
+freshly-coined, compositional expressions with no prior conventional reading, differing
+only in the explicit \emph{like}/\emph{as} marker), the contrast is sharp: Simile shows
+the single largest effect in the entire study ($+0.256$), while Novel Metaphor shows none
+on the same side. Holding novelty constant, syntactic packaging alone accounts for a
+bigger swing than the entire conventionality axis does: an explicitly-marked
+comparison transfers far more readily than a bare metaphorical assertion of identical
+novelty. Taken together, the idiom vector's reach is more specific than a single
+figurative-vs-literal axis in the abstract: it responds most to conventionalized
+figurative senses and to explicitly-marked comparisons, and least to bare, freshly-coined
+metaphor.
 
 \textbf{Limitations.} (i) Our idiom benchmark is a hand-reconstructed 20-idiom set, not
 IdioSteer's original stimuli, so absolute rates are not directly comparable across
@@ -479,12 +484,18 @@ We asked whether the steering direction discovered by IdioSteer for idioms refle
 general figurative-vs-literal axis, or is specific to idioms. Applying the idiom-derived
 vector, unmodified, to a new, paper-scale (100-item), dual-annotator-validated benchmark
 of non-idiomatic figurative expressions, we find broad, largely bidirectional
-generalization: the pooled figurative benchmark reproduces the same monotonic,
-high-coherence dose-response shape as idioms; Simile transfers even more strongly than
-idioms themselves and Conventional Metaphor transfers moderately; Novel Metaphor shows no
-effect on the literal-pushing side, plausibly due to an already literal-skewed baseline
-and rising incoherence at extreme coefficients rather than true insensitivity to
-steering. Our own idiom replication is a good qualitative match to IdioSteer's reported
+generalization, and the benchmark's two deliberately-varied axes (Section~\ref{sec:fig-data})
+each explain part of it: along conventionality (form held fixed), transfer strength tracks
+conventionality directly (Idiom $>$ Conventional Metaphor $>$ Novel Metaphor); along
+syntactic form (novelty held fixed between Simile and Novel Metaphor), an explicitly-marked
+comparison transfers far more readily than a bare metaphorical assertion of identical
+novelty (Simile's $+0.256$, the largest effect in the study, vs. Novel Metaphor's
+$\approx 0$ on the same side). So the idiom vector is not simply ``generalizes'' or
+``doesn't'': it reaches non-idiomatic figurative language most when the expression is
+either conventionalized or explicitly marked as a comparison, and least when it is both
+novel and bare, plausibly a ceiling effect rather than true insensitivity given Novel
+Metaphor's already literal-skewed baseline and rising incoherence at extreme coefficients.
+Our own idiom replication is a good qualitative match to IdioSteer's reported
 effect in shape, though its absolute baseline literal rate remains well above the
 paper's own reported value, a gap our small-scale judge-vs-human calibration
 ($\kappa=0.494$ vs.\ IdioSteer's $\kappa=0.821$, with a literal-leaning judge bias)

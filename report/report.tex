@@ -177,22 +177,27 @@ campfire flames.
 \end{quote}
 
 Conventional metaphors reuse widely lexicalized figurative senses (\emph{feed the fire},
-\emph{build a wall}, \emph{cut the ties}, \emph{plant the seeds}, \emph{steer the ship});
-novel metaphors invent non-lexicalized figurative extensions (\emph{overwrite the DNA},
-\emph{drain the aquarium}, \emph{recalibrate the compass}) to probe whether
-compositionality, not just figurativeness, matters; similes use explicit
+\emph{build a wall}, \emph{cut the ties}, \emph{plant the seeds}, \emph{steer the ship})
+that are frequent and familiar but, unlike idioms, remain compositional. Following the
+paper's own non-compositionality criterion for idiomaticity, we checked each of the ten
+against the standard substitutability diagnostic for separating a live conventional
+metaphor from a frozen idiom \citep{nunberg}: \emph{plant the seeds of doubt/hope/rebellion}
+all parse compositionally, whereas a true idiom such as \emph{spill the beans} does not
+survive substituting \emph{peas} for \emph{beans}; all ten Conventional Metaphor
+expressions pass. Novel metaphors invent non-lexicalized figurative extensions
+(\emph{overwrite the DNA}, \emph{drain the aquarium}, \emph{recalibrate the compass}) to
+probe whether compositionality, not just figurativeness, matters; similes use explicit
 \emph{like}/\emph{as} comparisons (\emph{like a severed cable}, \emph{like an empty
 vault}, \emph{like a corrupted file}). Each item carries a \texttt{gold} flag; 20 rows
-(one rigorously-validated variant per expression) form a higher-confidence subset used
-for judge calibration and as a separate, cleaner analysis slice (Section~\ref{sec:results}).
+(one rigorously-validated variant per expression) form a higher-confidence subset used as
+a separate, cleaner analysis slice (Section~\ref{sec:results}).
 
 Both benchmarks (idiom and figurative) went through a dual-annotator validation protocol
 adapted directly from IdioSteer's own validation methodology: two independent passes
 each write a figurative and a literal continuation for every prefix and flag any row
 where one reading is not genuinely plausible (full prompt in
 \texttt{validation/annotator\_prompt.md}). Every row in both final benchmarks is
-confirmed bidirectionally ambiguous, and, for the figurative set, confirmed non-idiomatic
-(compositional) where relevant.
+confirmed bidirectionally ambiguous by this protocol.
 
 \subsection{Evaluation protocol}
 
@@ -449,7 +454,10 @@ dual-annotator ambiguity-validation pass. (ii) Our judge-vs-human calibration co
 would let us check whether the same literal-leaning bias shows up on the figurative
 benchmark too. (iii) Category sample sizes (5 expressions $\times$ 5 variants for Novel
 Metaphor and Simile) are small enough that category-level deltas should be read as
-suggestive trends, not precise effect-size estimates.
+suggestive trends, not precise effect-size estimates. (iv) The Conventional Metaphor /
+idiom boundary check (Section~\ref{sec:fig-data}) is a single-author substitutability
+judgment, not independently cross-checked by a second annotator the way bidirectional
+ambiguity is.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -502,6 +510,11 @@ Rimsky et al.
 \bibitem[Haagsma et al., 2020]{magpie}
 Haagsma et al.
 \emph{MAGPIE: A Large Corpus of Potentially Idiomatic Expressions}, 2020.
+
+\bibitem[Nunberg et al., 1994]{nunberg}
+Nunberg, G., Sag, I. A., and Wasow, T.
+\emph{Idioms}.
+Language, 70(3):491--538, 1994.
 
 \bibitem[Anonymous, 2026]{steerability}
 Anonymous.
